@@ -78,10 +78,9 @@ const models: Record<string, Model> = {
           { "name": "Marketplace Fee Furniture", "amount": 500000, "note": "Transaksi awal" }
         ],
         "expList": [
-          { "name": "Facebook & IG Ads", "amount": 900000, "note": "Kampanye Akuisisi" },
           { "name": "Operasional Ringan", "amount": 1875000, "note": "Lisensi aset, toolkit" },
           { "name": "API WhatsApp & Midtrans", "amount": 1125000, "note": "Infrastruktur" },
-          { "name": "Marketing & Ads Tambahan", "amount": 2250000, "note": "Promosi menyasar komunitas" }
+          { "name": "Marketing Promosi", "amount": 1000000, "note": "Promosi menyasar komunitas" }
         ]
       },
       "6m": {
@@ -369,7 +368,7 @@ export default function BisnisDashboard() {
               <div className="strat-card-tagline">{m.tagline.slice(0, 110)}…</div>
               <div className="strat-revenue">
                 <div className="strat-revenue-label">Net Profit {activePeriod === "3m" ? "3 Bulan" : activePeriod === "6m" ? "6 Bulan" : activePeriod === "1y" ? "1 Tahun" : "3 Tahun"}</div>
-                <div className={`strat-revenue-num ${m.id}`}>{formatRp(m.data[activePeriod].revList.reduce((s, i) => s + i.amount, 0) - m.data[activePeriod].expList.reduce((s, i) => s + i.amount, 0))} <span style={{fontSize: "0.6em", fontWeight: 700}}>/ bln</span></div>
+                <div className={`strat-revenue-num ${m.id}`}>{formatRp(m.data[activePeriod].revList.reduce((s, i) => s + i.amount, 0) - m.data[activePeriod].expList.reduce((s, i) => s + i.amount, 0))} <span style={{ fontSize: "0.6em", fontWeight: 700 }}>/ bln</span></div>
                 <div className="strat-revenue-period">proyeksi bersih per bulan</div>
               </div>
               <span className={`strat-pill ${m.id}`}>{activeModel === m.id ? "● Sedang Dilihat" : "Lihat Detail →"}</span>
@@ -441,7 +440,7 @@ export default function BisnisDashboard() {
           <div className="grid-2">
             <div className="card-metric" style={{ borderColor: "rgba(239,68,68,0.2)" }}>
               <div className="card-title">🧾 Rincian Pengeluaran (per bulan)</div>
-              <div className="card-value loss">{formatRp(totalExp)} <span style={{fontSize:"0.6em", opacity:0.8}}>/ bln</span></div>
+              <div className="card-value loss">{formatRp(totalExp)} <span style={{ fontSize: "0.6em", opacity: 0.8 }}>/ bln</span></div>
               <p style={{ fontSize: "0.8rem", color: "#ef4444", marginTop: 4, opacity: 0.8 }}>Estimasi pengeluaran bulanan di fase ini</p>
               <ul className="expense-list">
                 {periodData.expList.map((item, idx) => (
@@ -460,7 +459,7 @@ export default function BisnisDashboard() {
             </div>
             <div className="card-metric" style={{ borderColor: `${model.color}30` }}>
               <div className="card-title">💰 Sumber Pendapatan (per bulan)</div>
-              <div className="card-value profit" style={{ color: model.colorAlt }}>{formatRp(totalRev)} <span style={{fontSize:"0.6em", opacity:0.8}}>/ bln</span></div>
+              <div className="card-value profit" style={{ color: model.colorAlt }}>{formatRp(totalRev)} <span style={{ fontSize: "0.6em", opacity: 0.8 }}>/ bln</span></div>
               <p style={{ fontSize: "0.8rem", color: model.color, marginTop: 4, opacity: 0.9 }}>Estimasi pemasukan bulanan di fase ini</p>
               <ul className="expense-list">
                 {periodData.revList.map((item, idx) => (
