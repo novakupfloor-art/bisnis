@@ -7,21 +7,14 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
-  const [isAuth, setIsAuth] = useState(false);
 
+  // We rely on server‑side middleware for protection. The client guard only prevents
+  // hydration mismatches by rendering nothing until the component is mounted.
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (!mounted) return;
-    
-    // Check if user is logged in
-    try {
-      const user = localStorage.getItem('cl_user');
-      if (user) {
-        setIsAuth(true);
-      } else {
+        sessionStorage.clear();
         setIsAuth(false);
         // Redirect to login if not logged in, unless already on login page
         if (pathname !== '/bisnis/login') {
