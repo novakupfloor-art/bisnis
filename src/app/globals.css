@@ -336,10 +336,30 @@ h1, h2, h3, h4, h5, h6 {
   height: 100%;
   overflow-y: auto;
   color: white;
+  flex-shrink: 0;
 }
 
 .studio-panel::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
 .studio-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); }
+
+/* Studio shell — hanya untuk wrapper lama (tidak dipakai di halaman baru) */
+.studio-desktop-shell {
+  height: 100vh;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.studio-desktop-workspace {
+  min-height: 100vh;
+}
+
+.scroll-x {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
 
 /* ===== SKELETON LOADING ===== */
 @keyframes shimmer {

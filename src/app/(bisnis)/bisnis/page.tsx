@@ -332,16 +332,6 @@ export default function BisnisDashboard() {
 
       <div className="dashboard-container">
 
-        {/* ═══ HEADER ══════════════════════════════════════ */}
-        <header className="header">
-          <span className="badge">📋 Rancangan Strategi Bisnis CerdasLiving</span>
-          <h1 className="title">Ultimate Strategy Monetisasi</h1>
-          <p className="subtitle">
-            Riset mendalam strategi bisnis gabungan bernilai tinggi untuk platform properti Indonesia —
-            dilengkapi proyeksi keuangan bulanan berdasar fase.
-          </p>
-        </header>
-
         {/* ═══ PORTAL LINK BANNER ══════════════════════════ */}
         <div className="portal-link-banner">
           <div className="portal-link-banner-text">
@@ -355,6 +345,30 @@ export default function BisnisDashboard() {
             Buka Portal →
           </Link>
         </div>
+
+        {/* ═══ CANVAS LINK BANNER ══════════════════════════ */}
+        <div className="portal-link-banner canvas-banner" style={{ background: "linear-gradient(135deg, #2c3e50 0%, #000000 100%)", marginTop: "1rem" }}>
+          <div className="portal-link-banner-text">
+            <span className="portal-link-banner-icon">🧠</span>
+            <div>
+              <span className="portal-link-banner-label" style={{ color: "var(--color-gold)" }}>Strategi Visual</span>
+              <span className="portal-link-banner-title" style={{ color: "white" }}>Lihat Business Model Canvas — Ekosistem Cerdas Living</span>
+            </div>
+          </div>
+          <Link href="/bisnis/canvas" className="portal-link-btn" id="btn-canvas-link" style={{ background: "var(--color-gold)", color: "black", borderColor: "var(--color-gold)" }}>
+            Buka Canvas →
+          </Link>
+        </div>
+
+        {/* ═══ HEADER ══════════════════════════════════════ */}
+        <header className="header" style={{ marginTop: "2.5rem" }}>
+          <span className="badge">📋 Rancangan Strategi Bisnis CerdasLiving</span>
+          <h1 className="title">Ultimate Strategy Monetisasi</h1>
+          <p className="subtitle">
+            Riset mendalam strategi bisnis gabungan bernilai tinggi untuk platform properti Indonesia —
+            dilengkapi proyeksi keuangan bulanan berdasar fase.
+          </p>
+        </header>
 
         {/* ═══ 3 STRATEGY COMPARISON CARDS ════════════════ */}
         <div className="strategy-compare">

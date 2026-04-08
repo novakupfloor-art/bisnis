@@ -13,7 +13,12 @@ export default function AntiScreenshot() {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Deteksi tombol PrintScreen
       if (e.key === 'PrintScreen') {
-        navigator.clipboard.writeText('');
+        // Attempt to clear clipboard only if user interaction allowed
+        try {
+          navigator.clipboard.writeText('');
+        } catch (err) {
+          // Silently ignore – clipboard access may be blocked without user activation
+        }
         alert('Fitur screenshot dan copy dinonaktifkan demi keamanan.');
         e.preventDefault();
       }
@@ -31,7 +36,11 @@ export default function AntiScreenshot() {
     // 3. Membersihkan clipboard jika PrintScreen ditekan (keyup)
     const handleKeyUp = (e: KeyboardEvent) => {
       if (e.key === 'PrintScreen') {
-        navigator.clipboard.writeText('');
+        try {
+          navigator.clipboard.writeText('');
+        } catch (err) {
+          // ignore clipboard permission errors
+        }
       }
     };
 

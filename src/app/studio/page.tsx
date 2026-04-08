@@ -1,4 +1,5 @@
 'use client';
+import './studio.css';
 
 import Link from 'next/link';
 import Image from 'next/image';
@@ -68,6 +69,8 @@ const DEMO_PROJECTS = [
 export default function StudioPage() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
+      <div className="studio-scroll">
+        <div className="studio-inner">
       {/* Page Header */}
       <div style={{
         background: 'var(--color-primary)',
@@ -237,6 +240,8 @@ export default function StudioPage() {
               <span style={{ fontSize: 14, fontWeight: 600 }}>Buat Project Baru</span>
             </button>
           </div>
+        </div>
+      </div>
         </div>
       </div>
     </div>

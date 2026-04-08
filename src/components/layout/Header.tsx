@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Search, ShoppingCart, Menu, X, Home, Sofa, Shirt, Layers } from 'lucide-react';
@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { label: 'Furniture', href: '/furniture' },
   { label: 'Fashion', href: '/fashion' },
   { label: 'Studio 3D', href: '/studio' },
+  { label: 'Canvas Bisnis', href: '/bisnis/canvas' },
 ];
 
 export default function Header() {
@@ -20,15 +21,24 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const pathname = usePathname();
 
-  const [isMounted, setIsMounted] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const isLoggedIn = useSyncExternalStore(
+    (onStoreChange) => {
+      if (typeof window === 'undefined') return () => {};
+      window.addEventListener('storage', onStoreChange);
+      return () => window.removeEventListener('storage', onStoreChange);
+    },
+    () => {
+      try {
+        return Boolean(localStorage.getItem('cl_user'));
+      } catch {
+        return false;
+      }
+    },
+    () => false
+  );
   const totalItems = useCartStore((state) => state.getTotalItems());
 
   useEffect(() => {
-    setIsMounted(true);
-    try {
-      if (localStorage.getItem('cl_user')) setIsLoggedIn(true);
-    } catch { }
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -186,7 +196,7 @@ export default function Header() {
               position: 'relative',
             }}>
               <ShoppingCart size={20} />
-              {isMounted && totalItems > 0 && (
+              {totalItems > 0 && (
                 <span style={{
                   position: 'absolute',
                   top: 2,
@@ -209,7 +219,7 @@ export default function Header() {
             </Link>
 
             {/* CTA Button */}
-            {isMounted && isLoggedIn ? (
+            {isLoggedIn ? (
               <Link href="/bisnis" className="btn btn-primary btn-sm" style={{ marginLeft: 8 }}>
                 Dashboard
               </Link>
@@ -275,10 +285,11 @@ export default function Header() {
               {item.label === 'Furniture' && <Sofa size={20} />}
               {item.label === 'Fashion' && <Shirt size={20} />}
               {item.label === 'Studio 3D' && <Layers size={20} />}
+              {item.label === 'Canvas Bisnis' && <Layers size={20} />}
               {item.label}
             </Link>
           ))}
-          {isMounted && isLoggedIn ? (
+          {isLoggedIn ? (
             <Link href="/bisnis" className="btn btn-primary" style={{ marginTop: 16, textAlign: 'center' }}>
               Ke Dashboard
             </Link>

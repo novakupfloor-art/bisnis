@@ -1,0 +1,240 @@
+/* canvas.css - Dark, Elegant, Luxury Theme for Business Model Canvas */
+
+.canvas-root {
+  min-height: 100vh;
+  background-color: #f4f6fa;
+  color: #0d1b2a;
+  padding: 3rem 1.5rem;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.canvas-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Header & Nav */
+.canvas-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+}
+
+.nav-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 99px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-dark {
+  background: #111827;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.btn-dark:hover {
+  background: #1f2937;
+  border-color: rgba(255,255,255,0.2);
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, #c5a059 0%, #a4752c 100%);
+  color: #000;
+  border: none;
+  box-shadow: 0 4px 15px rgba(197, 160, 89, 0.3);
+}
+
+.btn-gold:hover {
+  background: linear-gradient(135deg, #d4b472 0%, #b88636 100%);
+  box-shadow: 0 6px 20px rgba(197, 160, 89, 0.4);
+}
+
+.canvas-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.canvas-title-main {
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 800;
+  color: #0d1b2a;
+  margin: 0;
+  letter-spacing: -1px;
+}
+
+.canvas-title-sub {
+  color: #c5a059;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+/* Grid System */
+.canvas-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 1.5rem;
+  grid-auto-flow: dense;
+}
+
+/* Base Card Style */
+.canvas-card {
+  background: #ffffff;
+  border: 1px solid #e8ecf3;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+}
+
+.canvas-card:hover {
+  transform: translateY(-5px);
+  border-color: #c5a059;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Grid Placement - Standard Business Model Canvas Layout */
+/* Top Row: KP (2 cols), KA (2), VP (2), CR (2), CS (2) */
+.card-kp { grid-column: span 2; grid-row: span 2; }
+.card-ka { grid-column: span 2; grid-row: span 1; }
+.card-kr { grid-column: span 2; grid-row: span 1; }
+.card-vp { grid-column: span 2; grid-row: span 2; }
+.card-cr { grid-column: span 2; grid-row: span 1; }
+.card-ch { grid-column: span 2; grid-row: span 1; }
+.card-cs { grid-column: span 2; grid-row: span 2; }
+
+/* Bottom Row: Cost (5 cols), Revenue (5 cols) */
+.card-cost { grid-column: span 5; min-height: auto; }
+.card-rev  { grid-column: span 5; min-height: auto; }
+
+/* Content Styling */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid #f0f2f7;
+  padding-bottom: 1rem;
+}
+
+.card-icon {
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(197, 160, 89, 0.1);
+  border: 1px solid rgba(197, 160, 89, 0.2);
+}
+
+.card-title {
+  font-family: inherit;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0d1b2a;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.card-content {
+  flex: 1;
+}
+
+.card-split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Lists */
+.card-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.card-list li {
+  position: relative;
+  padding-left: 1.25rem;
+  margin-bottom: 0.85rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: #4a5568;
+}
+
+.card-list li::before {
+  content: '✦';
+  position: absolute;
+  left: 0;
+  top: 2px;
+  color: #c5a059;
+  font-size: 0.8rem;
+}
+
+.card-list li strong {
+  color: #0d1b2a;
+  font-weight: 700;
+}
+
+.card-list .subheading {
+  font-weight: 800;
+  color: #0d1b2a;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #f0f2f7;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.card-list .subheading:first-child {
+  margin-top: 0;
+}
+
+.card-list .subheading::before {
+  display: none;
+}
+
+.card-list .subheading {
+  padding-left: 0;
+}
+
+/* Responsiveness */
+@media (max-width: 1200px) {
+  .canvas-grid { grid-template-columns: repeat(6, 1fr); }
+  .card-kp, .card-ka, .card-kr, .card-vp, .card-cr, .card-ch, .card-cs { grid-column: span 2; }
+  .card-cost, .card-rev { grid-column: span 3; }
+}
+
+@media (max-width: 900px) {
+  .canvas-grid { grid-template-columns: repeat(4, 1fr); }
+  .card-kp, .card-vp, .card-cs { grid-column: span 2; grid-row: auto; }
+  .card-ka, .card-kr, .card-cr, .card-ch { grid-column: span 2; }
+  .card-cost, .card-rev { grid-column: span 4; }
+}
+
+@media (max-width: 600px) {
+  .canvas-root { padding: 1.5rem 1rem; }
+  .canvas-grid { grid-template-columns: 1fr; }
+  .card-kp, .card-vp, .card-cs, .card-ka, .card-kr, .card-cr, .card-ch, .card-cost, .card-rev { 
+    grid-column: span 1; 
+  }
+}
