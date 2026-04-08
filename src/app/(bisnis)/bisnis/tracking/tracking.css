@@ -1,9 +1,9 @@
 .track-root {
   min-height: 100vh;
-  background-color: #0d1117;
-  color: #c9d1d9;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-  padding: 3rem 2rem;
+  background-color: #f4f6fa;
+  color: #0d1b2a;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  padding: 4rem 2rem;
 }
 
 .track-header {
@@ -12,45 +12,49 @@
   align-items: flex-start;
   margin-bottom: 2.5rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid #30363d;
+  border-bottom: 1px solid #e8ecf3;
 }
 
 .track-title {
   font-size: 2rem;
-  color: #e5a50a;
+  color: #0d1b2a;
   margin: 0 0 0.5rem 0;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .track-subtitle {
-  color: #8b949e;
+  color: #4a5568;
   font-size: 1rem;
   max-width: 700px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .back-btn {
-  background-color: #21262d;
-  color: #c9d1d9;
+  background-color: #ffffff;
+  color: #0d1b2a;
   padding: 0.75rem 1.25rem;
   border-radius: 8px;
   text-decoration: none;
-  font-weight: 600;
-  border: 1px solid rgba(240, 246, 252, 0.1);
-  transition: 0.2s;
+  font-weight: 700;
+  border: 1.5px solid #d0d7e6;
+  transition: 0.2s cubic-bezier(0.16,1,0.3,1);
+  font-size: 0.85rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
 .back-btn:hover {
-  background-color: #30363d;
-  border-color: #8b949e;
+  background-color: #f0f2f7;
+  border-color: #b0bbd4;
+  transform: translateY(-1px);
 }
 
 .track-container {
-  background-color: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 12px;
+  background-color: #ffffff;
+  border: 1px solid #e8ecf3;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.03);
 }
 
 .table-wrapper {
@@ -61,91 +65,107 @@
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 }
 
 .track-table th {
-  background-color: #21262d;
-  color: #8b949e;
-  padding: 1rem;
-  font-weight: 600;
-  border-bottom: 1px solid #30363d;
+  background-color: #f8f9fc;
+  color: #4a5568;
+  padding: 1.15rem 1.25rem;
+  font-weight: 700;
+  border-bottom: 1.5px solid #e8ecf3;
   white-space: nowrap;
+  letter-spacing: 0.02em;
 }
 
 .track-table td {
-  padding: 1rem;
-  border-bottom: 1px solid #30363d;
+  padding: 1.15rem 1.25rem;
+  border-bottom: 1px solid #e8ecf3;
   vertical-align: top;
+  color: #0d1b2a;
 }
 
 .track-table tr:hover {
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: #fcfdff;
 }
 
 .row-suspicious {
-  background-color: rgba(218, 54, 51, 0.05) !important;
+  background-color: #fef2f2 !important;
 }
 
 .col-time {
   white-space: nowrap;
-  color: #8b949e;
+  color: #4a5568;
+  font-weight: 500;
 }
 
 .col-ip {
-  color: #58a6ff;
+  color: #2563eb;
   font-family: monospace;
   font-size: 1rem;
 }
 
+.col-user {
+  font-weight: 700; color: #0d1b2a;
+}
+.col-user strong {
+  font-weight: 800;
+}
+
 .text-org {
   font-size: 0.8rem;
-  color: #8b949e;
-  margin-top: 0.25rem;
+  color: #8b97b1;
+  margin-top: 0.35rem;
+  font-weight: 500;
 }
 
 .col-country {
-  font-weight: 600;
+  font-weight: 700;
+  color: #0d1b2a;
 }
 
 .col-agent {
-  color: #8b949e;
+  color: #4a5568;
   font-size: 0.8rem;
   word-break: break-all;
   max-width: 300px;
+  line-height: 1.5;
 }
 
 .badge-danger {
   display: inline-block;
-  background-color: rgba(218, 54, 51, 0.15);
-  color: #ff7b72;
-  border: 1px solid rgba(255, 123, 114, 0.4);
+  background-color: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
   padding: 0.25rem 0.6rem;
   border-radius: 20px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
+  letter-spacing: 0.02em;
 }
 
 .badge-safe {
   display: inline-block;
-  background-color: rgba(46, 160, 67, 0.15);
-  color: #3fb950;
-  border: 1px solid rgba(63, 185, 80, 0.4);
+  background-color: #d1fae5;
+  color: #059669;
+  border: 1px solid #6ee7b7;
   padding: 0.25rem 0.6rem;
   border-radius: 20px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
+  letter-spacing: 0.02em;
 }
 
 .loading-state, .error-state, .empty-state {
   padding: 4rem;
   text-align: center;
   font-size: 1.1rem;
-  color: #8b949e;
+  color: #4a5568;
+  font-weight: 500;
 }
 
 .error-state {
-  color: #ff7b72;
+  color: #dc2626;
 }

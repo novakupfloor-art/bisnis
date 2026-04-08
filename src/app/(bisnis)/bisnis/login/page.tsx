@@ -49,6 +49,25 @@ export default function BisnisLoginPage() {
 
       try {
         localStorage.setItem("cl_user", JSON.stringify({ key, display: user.display, emoji: user.emoji, role: user.role }));
+        
+        // Catat aktivitas spesifik login
+        fetch("https://ipapi.co/json/").then(r => r.json()).then(ipInfo => {
+          fetch("/api/track", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ip: ipInfo?.ip || "Unknown IP",
+              location: ipInfo ? `${ipInfo.city || 'Unknown City'}, ${ipInfo.region || ''}, ${ipInfo.country_name || 'Unknown Country'}` : "Unknown Location",
+              org: ipInfo?.org || "Unknown ISP/Org",
+              userAgent: window.navigator.userAgent,
+              path: "/bisnis/login (Action: LOGIN SUCCESS)",
+              isSuspicious: (ipInfo?.country_code && ipInfo.country_code !== "ID") ? true : false,
+              countryCode: ipInfo?.country_code || 'XX',
+              username: key
+            })
+          });
+        }).catch(() => {});
+        
       } catch { }
       router.replace("/bisnis");
     }, 600);

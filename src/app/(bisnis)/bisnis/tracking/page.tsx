@@ -15,6 +15,7 @@ interface TrackLog {
   path: string;
   isSuspicious: boolean;
   countryCode: string;
+  username?: string;
 }
 
 export default function TrackingDashboard() {
@@ -91,6 +92,7 @@ export default function TrackingDashboard() {
               <thead>
                 <tr>
                   <th>Waktu (WIB)</th>
+                  <th>Akun (User)</th>
                   <th>Alamat IP</th>
                   <th>Lokasi (ISP / Org)</th>
                   <th>Asal Negara</th>
@@ -104,6 +106,12 @@ export default function TrackingDashboard() {
                   return (
                     <tr key={log.id} className={log.isSuspicious ? "row-suspicious" : ""}>
                       <td className="col-time">{dateInfo}</td>
+                      <td className="col-user">
+                        <strong style={{ color: log.username && log.username !== "Guest" ? "#e6a20a" : "#8b949e" }}>
+                          {log.username && log.username !== "Guest" ? `👤 ${log.username}` : "🕵️ Guest"}
+                        </strong>
+                        <div style={{fontSize: "0.75rem", color: "#8b949e", marginTop: "4px"}}>{log.path}</div>
+                      </td>
                       <td className="col-ip">
                         <strong>{log.ip}</strong>
                       </td>

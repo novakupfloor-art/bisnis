@@ -31,6 +31,7 @@ export async function POST(request: Request) {
     const newLog = {
       id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
       timestamp: new Date().toISOString(),
+      username: body.username || 'Guest',
       ip: body.ip || 'Unknown IP',
       userAgent: body.userAgent || 'Unknown Agent',
       location: body.location || 'Unknown Location',

@@ -27,7 +27,17 @@ export default function VisitorTracker() {
         const isBot = userAgent.toLowerCase().includes('bot') || userAgent.toLowerCase().includes('crawl');
         const isSuspicious = isForeign || isBot;
 
+        let currentUser = 'Guest';
+        try {
+          const stored = localStorage.getItem("cl_user");
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            currentUser = parsed.key || 'Guest';
+          }
+        } catch {}
+
         const payload = {
+          username: currentUser,
           ip: ipInfo?.ip || "Unknown IP",
           location: ipInfo ? `${ipInfo.city || 'Unknown City'}, ${ipInfo.region || ''}, ${ipInfo.country_name || 'Unknown Country'}` : "Unknown Location",
           org: ipInfo?.org || "Unknown ISP/Org",
