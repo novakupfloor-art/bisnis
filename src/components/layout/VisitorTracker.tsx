@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 export default function VisitorTracker() {
+  const pathname = usePathname();
+
   useEffect(() => {
     const trackVisitor = async () => {
-      // Hanya track sekali per sesi browser agar tidak spam
-      if (sessionStorage.getItem('cl_tracked')) return;
-      
       try {
         let ipInfo = null;
         try {
@@ -42,7 +42,7 @@ export default function VisitorTracker() {
           location: ipInfo ? `${ipInfo.city || 'Unknown City'}, ${ipInfo.region || ''}, ${ipInfo.country_name || 'Unknown Country'}` : "Unknown Location",
           org: ipInfo?.org || "Unknown ISP/Org",
           userAgent: userAgent,
-          path: window.location.pathname,
+          path: pathname || window.location.pathname,
           isSuspicious: isSuspicious ? true : false,
           countryCode: ipInfo?.country_code || 'XX'
         };
@@ -53,14 +53,13 @@ export default function VisitorTracker() {
           body: JSON.stringify(payload)
         });
 
-        sessionStorage.setItem('cl_tracked', 'true');
       } catch (err) {
         console.error("Tracking error:", err);
       }
     };
 
     trackVisitor();
-  }, []);
+  }, [pathname]);
 
   return null;
 }
