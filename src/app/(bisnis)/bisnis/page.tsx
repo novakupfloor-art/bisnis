@@ -250,15 +250,17 @@ export default function BisnisDashboard() {
     } else {
       const userKey = `${currentUser.key}_${activeModel}`;
       const adminKey = `admin_${activeModel}`;
+      const ceoKey = `ceo_${activeModel}`;
       const myComments = (comments[userKey] || []).map((m, idx) => ({ ...m, key: userKey, idx }));
       const adminComments = (comments[adminKey] || []).map((m, idx) => ({ ...m, key: adminKey, idx }));
-      return [...myComments, ...adminComments].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+      const ceoComments = (comments[ceoKey] || []).map((m, idx) => ({ ...m, key: ceoKey, idx }));
+      return [...myComments, ...adminComments, ...ceoComments].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
     }
   };
 
   const totalAllComments = currentUser?.role === "admin"
     ? Object.values(comments).flat().length
-    : Object.entries(comments).filter(([k]) => k.startsWith((currentUser?.key ?? "") + "_") || k.startsWith("admin_")).reduce((s, [, v]) => s + v.length, 0);
+    : Object.entries(comments).filter(([k]) => k.startsWith((currentUser?.key ?? "") + "_") || k.startsWith("admin_") || k.startsWith("ceo_")).reduce((s, [, v]) => s + v.length, 0);
 
   const modelComments = getModelComments();
   const model = models[activeModel];
@@ -323,6 +325,11 @@ export default function BisnisDashboard() {
           </div>
         </div>
         <div className="user-bar-right">
+          {currentUser.role === "admin" && (
+            <Link href="/bisnis/tracking" className="comment-toggle-btn" style={{ background: "rgba(230, 162, 10, 0.2)", color: "#e6a20a", borderColor: "rgba(230, 162, 10, 0.4)", textDecoration: "none" }}>
+              🛡️ Radar & IP Audit
+            </Link>
+          )}
           <button className="comment-toggle-btn" onClick={() => setShowComments(!showComments)} id="btn-toggle-comments">
             💬 Komentar {totalAllComments > 0 && <span className="comment-count-badge">{totalAllComments}</span>}
           </button>

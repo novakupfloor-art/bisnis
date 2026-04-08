@@ -4,6 +4,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import AuthGuard from '@/components/layout/AuthGuard';
 import AntiScreenshot from '@/components/layout/AntiScreenshot';
+import VisitorTracker from '@/components/layout/VisitorTracker';
 
 export const metadata: Metadata = {
   title: {
@@ -36,6 +37,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body>
+        <VisitorTracker />
         <AntiScreenshot />
         <AuthGuard>
           <Header />

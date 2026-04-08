@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-const VALID_USERS: Record<string, { display: string; emoji: string; role: string }> = {
+const VALID_USERS: Record<string, { display: string; emoji: string; role: string; password?: string }> = {
   ian: { display: "Ian", emoji: "👤", role: "member" },
   dody: { display: "Dody", emoji: "👤", role: "member" },
-  admin: { display: "Admin", emoji: "🛡️", role: "admin" },
+  ceo: { display: "CEO", emoji: "🛡️", role: "admin", password: "ceocerdasliving" },
 };
 
 export default function BisnisLoginPage() {
@@ -39,14 +39,16 @@ export default function BisnisLoginPage() {
         setLoading(false);
         return;
       }
-      if (password.trim().toLowerCase() !== key) {
+      
+      const expectedPassword = user.password || key;
+      if (password.trim().toLowerCase() !== expectedPassword.toLowerCase()) {
         setError("Password salah.");
         setLoading(false);
         return;
       }
 
       try {
-        localStorage.setItem("cl_user", JSON.stringify({ key, ...user }));
+        localStorage.setItem("cl_user", JSON.stringify({ key, display: user.display, emoji: user.emoji, role: user.role }));
       } catch { }
       router.replace("/bisnis");
     }, 600);
@@ -269,7 +271,7 @@ export default function BisnisLoginPage() {
                   value={password}
                   onChange={(e) => { setPassword(e.target.value); setError(""); }}
                   autoComplete="current-password"
-                  placeholder="(sama dengan username)"
+                  placeholder="Masukkan password"
                   required
                 />
                 <button
