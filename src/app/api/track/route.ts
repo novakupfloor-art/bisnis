@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 
+export const dynamic = 'force-dynamic';
+
 // Kita menggunakan file public/data.json atau folder di luar publik untuk menyimpan logs
 // Di lingkungan production berbasis Node.js/Laragon, file ini akan bertahan secara lokal.
 const dataDir = path.join(process.cwd(), 'data');

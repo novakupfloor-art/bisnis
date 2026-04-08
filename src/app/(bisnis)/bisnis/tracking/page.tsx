@@ -46,7 +46,7 @@ export default function TrackingDashboard() {
     if (!mounted) return;
     const fetchLogs = async () => {
       try {
-        const res = await fetch("/api/track");
+        const res = await fetch("/api/track?t=" + Date.now(), { cache: "no-store" });
         if (!res.ok) throw new Error("Gagal mengambil data tracking.");
         const data = await res.json();
         if (data.success) {
