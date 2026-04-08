@@ -27,12 +27,12 @@ export default function VisitorTracker() {
         const isBot = userAgent.toLowerCase().includes('bot') || userAgent.toLowerCase().includes('crawl');
         const isSuspicious = isForeign || isBot;
 
-        let currentUser = 'Guest';
+        let currentUser = 'Unknown';
         try {
           const stored = localStorage.getItem("cl_user");
           if (stored) {
             const parsed = JSON.parse(stored);
-            currentUser = parsed.key || 'Guest';
+            currentUser = parsed.key || 'Unknown';
           }
         } catch {}
 

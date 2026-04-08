@@ -92,7 +92,7 @@ export default function TrackingDashboard() {
               <thead>
                 <tr>
                   <th>Waktu (WIB)</th>
-                  <th>Akun (User)</th>
+                  <th>Username</th>
                   <th>Alamat IP</th>
                   <th>Lokasi (ISP / Org)</th>
                   <th>Asal Negara</th>
@@ -107,8 +107,8 @@ export default function TrackingDashboard() {
                     <tr key={log.id} className={log.isSuspicious ? "row-suspicious" : ""}>
                       <td className="col-time">{dateInfo}</td>
                       <td className="col-user">
-                        <strong style={{ color: log.username && log.username !== "Guest" ? "#e6a20a" : "#8b949e" }}>
-                          {log.username && log.username !== "Guest" ? `👤 ${log.username}` : "🕵️ Guest"}
+                        <strong style={{ color: log.username && log.username !== "Guest" && log.username !== "Unknown" ? "#d97706" : "#8b949e" }}>
+                          {log.username && log.username !== "Guest" && log.username !== "Unknown" ? `@${log.username}` : "Unknown"}
                         </strong>
                         <div style={{fontSize: "0.75rem", color: "#8b949e", marginTop: "4px"}}>{log.path}</div>
                       </td>
