@@ -1,64 +1,58 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import { pushLoginLog } from '@/lib/loginLog';
 
+/**
+ * Tracks each page visit and stores the details in localStorage.
+ * Captured fields: username (from cl_user), IP, location, ISP, user‑agent,
+ * current path, suspicion flag, and timestamp.
+ */
 export default function VisitorTracker() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const trackVisitor = async () => {
+    const track = async () => {
       try {
-        let ipInfo = null;
+        // Fetch IP and geo info – tolerant to failures.
+        let ipInfo: any = null;
         try {
-          // Meminta informasi IP address dan lokasi
-          const res = await fetch("https://ipapi.co/json/");
+          const res = await fetch('https://ipapi.co/json/');
           ipInfo = await res.json();
         } catch (e) {
-          console.error("Gagal mendapatkan info IP", e);
+          console.error('IP lookup failed', e);
         }
 
-        const userAgent = window.navigator.userAgent;
-        
-        // Memeriksa apakah akses dari asing (bukan ID)
-        const isForeign = ipInfo?.country_code && ipInfo.country_code !== "ID";
-        
-        // Memeriksa apakah ada kemungkinan bot/kompetitor
-        const isBot = userAgent.toLowerCase().includes('bot') || userAgent.toLowerCase().includes('crawl');
+        const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown';
+        const isForeign = ipInfo?.country_code && ipInfo.country_code !== 'ID';
+        const isBot = /bot|crawl|spider/i.test(userAgent);
         const isSuspicious = isForeign || isBot;
 
-        let currentUser = 'Unknown';
-        try {
-          const stored = localStorage.getItem("cl_user");
-          if (stored) {
-            const parsed = JSON.parse(stored);
-            currentUser = parsed.key || 'Unknown';
-          }
-        } catch {}
+        const storedUser = typeof window !== 'undefined' ? localStorage.getItem('cl_user') : null;
+        const username = storedUser || 'Unknown';
 
         const payload = {
-          username: currentUser,
-          ip: ipInfo?.ip || "Unknown IP",
-          location: ipInfo ? `${ipInfo.city || 'Unknown City'}, ${ipInfo.region || ''}, ${ipInfo.country_name || 'Unknown Country'}` : "Unknown Location",
-          org: ipInfo?.org || "Unknown ISP/Org",
-          userAgent: userAgent,
+          username,
+          ip: ipInfo?.ip || 'Unknown IP',
+          location: ipInfo
+            ? `${ipInfo.city || 'Unknown City'}, ${ipInfo.region || ''}, ${ipInfo.country_name || 'Unknown Country'}`
+            : 'Unknown Location',
+          org: ipInfo?.org || 'Unknown ISP/Org',
+          userAgent,
           path: pathname || window.location.pathname,
-          isSuspicious: isSuspicious ? true : false,
-          countryCode: ipInfo?.country_code || 'XX'
+          isSuspicious,
+          countryCode: ipInfo?.country_code || 'XX',
+          timestamp: new Date().toISOString(),
         };
 
-        await fetch("/api/track", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
+        // Store the visit log locally (same array used for login logs).
+        pushLoginLog(payload);
       } catch (err) {
-        console.error("Tracking error:", err);
+        console.error('VisitorTracker error', err);
       }
     };
-
-    trackVisitor();
+    track();
   }, [pathname]);
 
   return null;

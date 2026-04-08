@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+// Supabase removed – no DB logging
 
 export const dynamic = 'force-dynamic';
 
@@ -39,23 +39,7 @@ export async function POST(request: Request) {
   const isValid = email && password && email.includes('@'); // simplistic check
   // ---- END placeholder authentication ----
 
-  // Record the attempt in Supabase
-  const { data, error } = await supabase
-    .from('login_logs')
-    .insert([
-      {
-        email,
-        ip,
-        user_agent: userAgent,
-        timestamp,
-        success: isValid,
-      },
-    ]);
-
-  if (error) {
-    console.error('Supabase insert error:', error);
-    // Still respond with login result; the logging failure should not block login.
-  }
+// Supabase logging removed – no DB operation
 
   if (isValid) {
     // Set a simple session token in a cookie (for demo purposes).
