@@ -255,6 +255,484 @@ function Studio3DCanvas({ placedItems, selectedItemId, setSelectedItemId, wallCo
   );
 }
 
+// ===== FURNITURE LIST COMPONENT (extracted outside render) =====
+interface FurnitureListProps {
+  compact?: boolean;
+  searchQuery: string;
+  setSearchQuery: (v: string) => void;
+  filterCategory: string;
+  setFilterCategory: (v: string) => void;
+  filteredFurniture: FurnitureProduct[];
+  addToCanvas: (item: FurnitureProduct) => void;
+}
+
+function FurnitureList({ compact = false, searchQuery, setSearchQuery, filterCategory, setFilterCategory, filteredFurniture, addToCanvas }: FurnitureListProps) {
+  return (
+    <>
+      {/* Search */}
+      <div style={{ padding: compact ? '12px 14px 8px' : '16px 16px 10px', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
+        <div style={{ position: 'relative', marginBottom: 8 }}>
+          <Search size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.35)', pointerEvents: 'none' }} />
+          <input
+            type="text" placeholder="Cari furniture..." value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ width: '100%', padding: '8px 8px 8px 30px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: 'white', fontSize: 13, outline: 'none' }}
+          />
+        </div>
+        {/* Category chips */}
+        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
+          {['Semua', 'sofa', 'meja', 'kursi', 'lampu'].map((cat) => (
+            <button key={cat} onClick={() => setFilterCategory(cat)} style={{
+              padding: '4px 12px', borderRadius: 999, border: '1px solid',
+              borderColor: filterCategory === cat ? 'var(--color-gold)' : 'rgba(255,255,255,0.15)',
+              background: filterCategory === cat ? 'var(--color-gold)' : 'transparent',
+              color: filterCategory === cat ? '#1A1A2E' : 'rgba(255,255,255,0.6)',
+              fontSize: 11, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+            }}>{cat}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Items */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {filteredFurniture.length === 0 ? (
+          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, textAlign: 'center', paddingTop: 20 }}>Tidak ditemukan</p>
+        ) : filteredFurniture.map((item) => (
+          <div key={item.id}
+            onClick={() => addToCanvas(item)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 12,
+              background: 'rgba(255,255,255,0.05)', borderRadius: 10, padding: '10px 12px',
+              cursor: 'pointer', border: '1px solid transparent', transition: 'all 0.15s',
+            }}
+            onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.borderColor = 'rgba(201,168,76,0.45)'}
+            onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.borderColor = 'transparent'}
+          >
+            {/* Emoji icon */}
+            <div style={{ width: 46, height: 46, borderRadius: 8, background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 22 }}>
+              {item.category === 'sofa' ? '🛋️' : item.category === 'meja' ? '🪑' : item.category === 'lampu' ? '💡' : item.category === 'kursi' ? '🪑' : '🪴'}
+            </div>
+            {/* Info */}
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</p>
+              <p style={{ fontSize: 12, color: 'var(--color-gold)', fontWeight: 500 }}>{formatIDR(item.price)}</p>
+              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 1 }}>{item.category} · {item.model3d.dimensions.width}×{item.model3d.dimensions.depth}cm</p>
+            </div>
+            {/* Add button */}
+            <button style={{
+              background: 'rgba(201,168,76,0.18)', border: '1px solid rgba(201,168,76,0.35)',
+              borderRadius: 6, padding: '6px 10px', color: 'var(--color-gold)',
+              fontSize: 12, fontWeight: 700, cursor: 'pointer', flexShrink: 0, lineHeight: 1,
+            }}>
+              + Tambah
+            </button>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+// ===== CUSTOMIZATION PANEL (extracted outside render) =====
+interface KustomPanelProps {
+  wallColor: string;
+  setWallColor: (v: string) => void;
+  floorType: string;
+  setFloorType: (v: string) => void;
+  lightMode: string;
+  setLightMode: (v: string) => void;
+}
+
+function KustomPanel({ wallColor, setWallColor, floorType, setFloorType, lightMode, setLightMode }: KustomPanelProps) {
+  return (
+    <div style={{ flex: 1, overflowY: 'auto', padding: '16px 14px' }}>
+      {/* Wall Color */}
+      <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-gold)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 12 }}>Warna Dinding</p>
+      <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+        {WALL_COLORS.map((c) => (
+          <button key={c.hex} title={c.name} onClick={() => setWallColor(c.hex)} style={{
+            width: 36, height: 36, borderRadius: '50%', background: c.hex, cursor: 'pointer', outline: 'none',
+            border: wallColor === c.hex ? '3px solid var(--color-gold)' : '3px solid transparent',
+            boxShadow: wallColor === c.hex ? '0 0 0 2px rgba(201,168,76,0.4)' : 'none',
+          }} />
+        ))}
+      </div>
+
+      {/* Floor */}
+      <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-gold)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 10 }}>Jenis Lantai</p>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+        {FLOOR_TYPES.map((f) => (
+          <button key={f} onClick={() => setFloorType(f.toLowerCase())} style={{
+            padding: '7px 14px', borderRadius: 8, border: '1px solid',
+            borderColor: floorType === f.toLowerCase() ? 'var(--color-gold)' : 'rgba(255,255,255,0.2)',
+            background: floorType === f.toLowerCase() ? 'var(--color-gold)' : 'rgba(255,255,255,0.05)',
+            color: floorType === f.toLowerCase() ? '#1A1A2E' : 'rgba(255,255,255,0.7)',
+            fontSize: 13, fontWeight: 600, cursor: 'pointer',
+          }}>{f}</button>
+        ))}
+      </div>
+
+      {/* Lighting */}
+      <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-gold)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 10 }}>Pencahayaan</p>
+      <div style={{ display: 'flex', gap: 8 }}>
+        {LIGHTING_OPTIONS.map((l) => (
+          <button key={l} onClick={() => setLightMode(l)} style={{
+            padding: '7px 14px', borderRadius: 8, border: '1px solid',
+            borderColor: lightMode === l ? 'var(--color-gold)' : 'rgba(255,255,255,0.2)',
+            background: lightMode === l ? 'var(--color-gold)' : 'rgba(255,255,255,0.05)',
+            color: lightMode === l ? '#1A1A2E' : 'rgba(255,255,255,0.7)',
+            fontSize: 13, fontWeight: 600, cursor: 'pointer',
+          }}>{l}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ===== CART PANEL CONTENT (extracted outside render) =====
+interface CartPanelContentProps {
+  placedItems: PlacedItem[];
+  selectedItemId: string | null;
+  setSelectedItemId: (id: string | null) => void;
+  setMobileTab: (tab: MobileTab) => void;
+  setViewMode: (mode: ViewMode) => void;
+  handleRotate: (id: string) => void;
+  removeItem: (id: string) => void;
+  handleAddAllToCart: () => void;
+  totalPrice: number;
+}
+
+function CartPanelContent({ placedItems, selectedItemId, setSelectedItemId, setMobileTab, setViewMode, handleRotate, removeItem, handleAddAllToCart, totalPrice }: CartPanelContentProps) {
+  return (
+    <>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {/* Selected position info */}
+        {placedItems.length > 0 && selectedItemId && (() => {
+          const sel = placedItems.find((i) => i.id === selectedItemId);
+          return sel ? (
+            <div style={{ padding: '8px 10px', background: 'rgba(201,168,76,0.1)', borderRadius: 8, border: '1px solid rgba(201,168,76,0.2)', marginBottom: 4 }}>
+              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', marginBottom: 2 }}>Posisi Dipilih</p>
+              <p style={{ fontSize: 12, color: 'var(--color-gold)', fontFamily: 'monospace' }}>X: {sel.position[0].toFixed(1)}m &nbsp; Z: {sel.position[2].toFixed(1)}m</p>
+            </div>
+          ) : null;
+        })()}
+
+        {placedItems.length === 0 ? (
+          <div style={{ textAlign: 'center', paddingTop: 24 }}>
+            <p style={{ fontSize: 28, marginBottom: 8 }}>🛋️</p>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>Belum ada furniture di canvas</p>
+            <button onClick={() => setMobileTab('shop')} style={{
+              marginTop: 12, padding: '8px 16px', background: 'rgba(201,168,76,0.15)',
+              border: '1px solid rgba(201,168,76,0.3)', borderRadius: 8,
+              color: 'var(--color-gold)', fontSize: 13, cursor: 'pointer',
+            }}>Buka Shop →</button>
+          </div>
+        ) : placedItems.map((item) => {
+          const product = FURNITURE.find((f) => f.id === item.productId);
+          if (!product) return null;
+          return (
+            <div key={item.id}
+              style={{
+                background: selectedItemId === item.id ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.05)',
+                borderRadius: 10, padding: '11px 12px',
+                border: selectedItemId === item.id ? '1px solid rgba(201,168,76,0.35)' : '1px solid transparent',
+                cursor: 'pointer', transition: 'all 0.15s',
+              }}
+              onClick={() => setSelectedItemId(item.id)}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 2, lineHeight: 1.3 }}>{product.name}</p>
+                  <p style={{ fontSize: 12, color: 'var(--color-gold)' }}>{formatIDR(product.price)}</p>
+                  <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2, fontFamily: 'monospace' }}>
+                    ({item.position[0].toFixed(1)}, {item.position[2].toFixed(1)})
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                  <button onClick={(e) => { e.stopPropagation(); handleRotate(item.id); setSelectedItemId(item.id); }}
+                    title="Putar 90°"
+                    style={{ background: 'rgba(201,168,76,0.15)', border: 'none', borderRadius: 6, padding: '5px 7px', color: 'var(--color-gold)', cursor: 'pointer' }}>
+                    <RotateCw size={12} />
+                  </button>
+                  <button onClick={(e) => { e.stopPropagation(); setSelectedItemId(item.id); setViewMode('move'); }}
+                    title="Pindahkan"
+                    style={{ background: 'rgba(201,168,76,0.15)', border: 'none', borderRadius: 6, padding: '5px 7px', color: 'var(--color-gold)', cursor: 'pointer' }}>
+                    <Move size={12} />
+                  </button>
+                  <button onClick={(e) => { e.stopPropagation(); removeItem(item.id); }}
+                    style={{ background: 'rgba(255,80,80,0.1)', border: 'none', borderRadius: 6, padding: '5px 7px', color: 'rgba(255,100,100,0.7)', cursor: 'pointer' }}>
+                    <X size={12} />
+                  </button>
+                </div>
+              </div>
+              <div style={{ marginTop: 8 }}>
+                <Link href={`/furniture/${product.id}`}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: 6, padding: '5px 10px', color: 'rgba(255,255,255,0.6)', fontSize: 11, textDecoration: 'none', width: 'fit-content' }}>
+                  <Eye size={10} /> Lihat Produk
+                </Link>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Total & CTA */}
+      <div style={{ padding: '14px', borderTop: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>Total ({placedItems.length} item)</span>
+          <span style={{ fontSize: 17, fontWeight: 700, color: 'white' }}>{formatIDR(totalPrice)}</span>
+        </div>
+        <button onClick={handleAddAllToCart} className="btn btn-primary"
+          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: placedItems.length === 0 ? 0.5 : 1 }}
+          disabled={placedItems.length === 0}>
+          <ShoppingCart size={16} /> Beli Semua Furniture
+        </button>
+      </div>
+    </>
+  );
+}
+
+// ===== DESKTOP LEFT PANEL (extracted outside render) =====
+interface DesktopLeftPanelProps extends FurnitureListProps, KustomPanelProps {}
+
+function DesktopLeftPanel(props: DesktopLeftPanelProps) {
+  return (
+    <div className="studio-panel" style={{ width: 300, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
+        <p style={{ color: 'white', fontWeight: 700, fontSize: 15, marginBottom: 10 }}>Katalog Furniture</p>
+      </div>
+      <FurnitureList {...props} />
+      {/* Customization below list on desktop */}
+      <div style={{ padding: '14px 16px', borderTop: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
+        <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-gold)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 10 }}>Kustomisasi</p>
+        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 6 }}>Warna Dinding</p>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
+          {WALL_COLORS.map((c) => (
+            <button key={c.hex} title={c.name} onClick={() => props.setWallColor(c.hex)} style={{
+              width: 26, height: 26, borderRadius: '50%', background: c.hex, cursor: 'pointer', outline: 'none',
+              border: props.wallColor === c.hex ? '2px solid var(--color-gold)' : '2px solid transparent',
+            }} />
+          ))}
+        </div>
+        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 6 }}>Lantai</p>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
+          {FLOOR_TYPES.map((f) => (
+            <button key={f} onClick={() => props.setFloorType(f.toLowerCase())} style={{
+              padding: '3px 8px', borderRadius: 999, border: '1px solid',
+              borderColor: props.floorType === f.toLowerCase() ? 'var(--color-gold)' : 'rgba(255,255,255,0.2)',
+              background: props.floorType === f.toLowerCase() ? 'var(--color-gold)' : 'transparent',
+              color: props.floorType === f.toLowerCase() ? '#1A1A2E' : 'rgba(255,255,255,0.6)',
+              fontSize: 11, cursor: 'pointer',
+            }}>{f}</button>
+          ))}
+        </div>
+        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 6 }}>Cahaya</p>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {LIGHTING_OPTIONS.map((l) => (
+            <button key={l} onClick={() => props.setLightMode(l)} style={{
+              padding: '3px 8px', borderRadius: 999, border: '1px solid',
+              borderColor: props.lightMode === l ? 'var(--color-gold)' : 'rgba(255,255,255,0.2)',
+              background: props.lightMode === l ? 'var(--color-gold)' : 'transparent',
+              color: props.lightMode === l ? '#1A1A2E' : 'rgba(255,255,255,0.6)',
+              fontSize: 11, cursor: 'pointer',
+            }}>{l}</button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ===== DESKTOP RIGHT PANEL (extracted outside render) =====
+function DesktopRightPanel(props: CartPanelContentProps) {
+  return (
+    <div className="studio-panel" style={{ width: 280, display: 'flex', flexDirection: 'column', borderRight: 'none', borderLeft: '1px solid rgba(255,255,255,0.1)' }}>
+      <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <ShoppingCart size={16} color="var(--color-gold)" />
+          <p style={{ color: 'white', fontWeight: 700, fontSize: 15 }}>Ringkasan Furniture</p>
+        </div>
+      </div>
+      <CartPanelContent {...props} />
+    </div>
+  );
+}
+
+// ===== TOP BAR (extracted outside render) =====
+interface TopBarProps {
+  isMobile: boolean;
+  viewMode: ViewMode;
+  setViewMode: (mode: ViewMode) => void;
+}
+
+function TopBar({ isMobile, viewMode, setViewMode }: TopBarProps) {
+  return (
+    <div style={{
+      background: '#1a1a2e', borderBottom: '1px solid rgba(255,255,255,0.1)',
+      padding: isMobile ? '10px 14px' : '11px 24px',
+      display: 'flex', alignItems: 'center', gap: isMobile ? 8 : 16, flexShrink: 0,
+    }}>
+      <Link href="/studio" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5, fontSize: 14, flexShrink: 0 }}>
+        <ArrowLeft size={16} />{!isMobile && ' Studio'}
+      </Link>
+      {!isMobile && <ChevronRight size={14} color="rgba(255,255,255,0.3)" />}
+      <span style={{ color: 'white', fontWeight: 600, fontSize: isMobile ? 14 : 16, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        3D Furniture Try-On
+      </span>
+      {/* Mode toggle */}
+      <div style={{ display: 'flex', background: 'rgba(255,255,255,0.07)', borderRadius: 8, padding: 3, gap: 3, flexShrink: 0 }}>
+        {([
+          { mode: 'view' as ViewMode, Icon: MousePointer, label: 'Kamera' },
+          { mode: 'move' as ViewMode, Icon: Move, label: 'Pindah' },
+        ]).map(({ mode, Icon, label }) => (
+          <button key={mode} onClick={() => setViewMode(mode)} title={label} style={{
+            display: 'flex', alignItems: 'center', gap: 5,
+            padding: isMobile ? '5px 9px' : '6px 12px',
+            borderRadius: 6, border: 'none',
+            background: viewMode === mode ? 'rgba(201,168,76,0.25)' : 'transparent',
+            color: viewMode === mode ? '#C9A84C' : 'rgba(255,255,255,0.5)',
+            cursor: 'pointer', fontSize: 12, fontWeight: viewMode === mode ? 700 : 400,
+          }}>
+            <Icon size={13} />{!isMobile && ` ${label}`}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ===== MOBILE BOTTOM SHEET (extracted outside render) =====
+interface MobileBottomSheetProps {
+  mobileTab: MobileTab;
+  setMobileTab: (tab: MobileTab) => void;
+  placedItems: PlacedItem[];
+  furnitureListProps: FurnitureListProps;
+  kustomPanelProps: KustomPanelProps;
+  cartPanelProps: CartPanelContentProps;
+}
+
+function MobileBottomSheet({ mobileTab, setMobileTab, placedItems, furnitureListProps, kustomPanelProps, cartPanelProps }: MobileBottomSheetProps) {
+  const BOTTOM_PANEL_HEIGHT = '62vh';
+  const TABS: { id: MobileTab; label: string; icon: React.ReactNode; badge?: number }[] = [
+    { id: 'shop', label: 'Shop', icon: <Store size={15} /> },
+    { id: 'kustom', label: 'Kustomisasi', icon: <Paintbrush size={15} /> },
+    { id: 'keranjang', label: 'Keranjang', icon: <ShoppingCart size={15} />, badge: placedItems.length },
+  ];
+
+  return (
+    <div style={{
+      position: 'fixed', bottom: 0, left: 0, right: 0,
+      background: '#1a1a2e',
+      borderTop: '2px solid rgba(255,255,255,0.1)',
+      zIndex: 200,
+      borderRadius: '18px 18px 0 0',
+      maxHeight: mobileTab ? BOTTOM_PANEL_HEIGHT : 'auto',
+      display: 'flex', flexDirection: 'column',
+      transition: 'max-height 0.3s cubic-bezier(0.4,0,0.2,1)',
+      boxShadow: '0 -8px 40px rgba(0,0,0,0.5)',
+    }}>
+      {/* Tab Bar */}
+      <div style={{ display: 'flex', flexShrink: 0 }}>
+        {TABS.map(({ id, label, icon, badge }) => (
+          <button key={id} onClick={() => setMobileTab(mobileTab === id ? null : id)} style={{
+            flex: 1, padding: '13px 6px 10px',
+            background: 'transparent', border: 'none',
+            borderBottom: mobileTab === id ? '2px solid var(--color-gold)' : '2px solid transparent',
+            color: mobileTab === id ? 'var(--color-gold)' : 'rgba(255,255,255,0.45)',
+            fontSize: 12, fontWeight: 600, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+            position: 'relative',
+          }}>
+            {icon} {label}
+            {/* Badge */}
+            {(badge !== undefined && badge > 0) && (
+              <span style={{
+                position: 'absolute', top: 8, right: '22%',
+                background: '#C9A84C', color: '#1A1A2E',
+                borderRadius: '50%', width: 16, height: 16,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 9, fontWeight: 800, lineHeight: 1,
+              }}>{badge}</span>
+            )}
+            {/* Chevron */}
+            {mobileTab === id
+              ? <ChevronDown size={12} style={{ opacity: 0.6 }} />
+              : <ChevronUp size={12} style={{ opacity: 0.4 }} />
+            }
+          </button>
+        ))}
+      </div>
+
+      {/* Content */}
+      {mobileTab && (
+        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          {mobileTab === 'shop' && <FurnitureList {...furnitureListProps} compact />}
+          {mobileTab === 'kustom' && <KustomPanel {...kustomPanelProps} />}
+          {mobileTab === 'keranjang' && <CartPanelContent {...cartPanelProps} />}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ===== CENTER CANVAS AREA (extracted outside render) =====
+interface CanvasCenterProps {
+  extraPaddingBottom?: string;
+  isDragMode: boolean;
+  isMobile: boolean;
+  placedItems: PlacedItem[];
+  canvasProps: {
+    placedItems: PlacedItem[];
+    selectedItemId: string | null;
+    setSelectedItemId: (id: string | null) => void;
+    wallColor: string;
+    floorType: string;
+    lightMode: string;
+    viewMode: ViewMode;
+    handleDragEnd: (id: string, pos: [number, number, number]) => void;
+    handleRotateEnd: (id: string, rot: number) => void;
+    environmentPresets: Record<string, 'city' | 'sunset' | 'night' | 'apartment'>;
+  };
+}
+
+function CanvasCenter({ extraPaddingBottom, isDragMode, isMobile, placedItems, canvasProps }: CanvasCenterProps) {
+  return (
+    <div style={{ flex: 1, position: 'relative', background: '#2d2d4e', overflow: 'hidden', paddingBottom: extraPaddingBottom }}>
+      {/* Mode badge */}
+      <div style={{
+        position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
+        zIndex: 10, pointerEvents: 'none',
+        background: isDragMode ? 'rgba(201,168,76,0.2)' : 'rgba(0,0,0,0.45)',
+        border: `1px solid ${isDragMode ? 'rgba(201,168,76,0.5)' : 'rgba(255,255,255,0.12)'}`,
+        borderRadius: 20, padding: '5px 14px',
+        display: 'flex', alignItems: 'center', gap: 6,
+        backdropFilter: 'blur(8px)', whiteSpace: 'nowrap',
+      }}>
+        {isDragMode
+          ? <><Move size={11} color="#C9A84C" /><span style={{ fontSize: 11, color: '#C9A84C', fontWeight: 600 }}>Mode Pindah — seret furniture</span></>
+          : <><MousePointer size={11} color="rgba(255,255,255,0.6)" /><span style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>Mode Kamera — seret untuk putar</span></>
+        }
+      </div>
+
+      <Studio3DCanvas {...canvasProps} />
+
+      {placedItems.length === 0 && (
+        <div style={{
+          position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', textAlign: 'center',
+        }}>
+          <div style={{ opacity: 0.4 }}>
+            <p style={{ fontSize: 30, marginBottom: 10 }}>🛋️</p>
+            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: isMobile ? 13 : 15, fontWeight: 500 }}>
+              {isMobile ? 'Buka Shop di bawah untuk menambah furniture' : 'Pilih furniture dari katalog untuk ditempatkan'}
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ===== MAIN PAGE =====
 export default function Furniture3DPage() {
   const [placedItems, setPlacedItems] = useState<PlacedItem[]>([]);
@@ -346,411 +824,34 @@ export default function Furniture3DPage() {
     handleDragEnd, handleRotateEnd, environmentPresets,
   };
 
-  // ===== SHARED CATALOG LIST (Desktop + Mobile) =====
-  const FurnitureList = ({ compact = false }: { compact?: boolean }) => (
-    <>
-      {/* Search */}
-      <div style={{ padding: compact ? '12px 14px 8px' : '16px 16px 10px', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
-        <div style={{ position: 'relative', marginBottom: 8 }}>
-          <Search size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.35)', pointerEvents: 'none' }} />
-          <input
-            type="text" placeholder="Cari furniture..." value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ width: '100%', padding: '8px 8px 8px 30px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: 'white', fontSize: 13, outline: 'none' }}
-          />
-        </div>
-        {/* Category chips */}
-        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
-          {['Semua', 'sofa', 'meja', 'kursi', 'lampu'].map((cat) => (
-            <button key={cat} onClick={() => setFilterCategory(cat)} style={{
-              padding: '4px 12px', borderRadius: 999, border: '1px solid',
-              borderColor: filterCategory === cat ? 'var(--color-gold)' : 'rgba(255,255,255,0.15)',
-              background: filterCategory === cat ? 'var(--color-gold)' : 'transparent',
-              color: filterCategory === cat ? '#1A1A2E' : 'rgba(255,255,255,0.6)',
-              fontSize: 11, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-            }}>{cat}</button>
-          ))}
-        </div>
-      </div>
+  const furnitureListProps: FurnitureListProps = {
+    searchQuery, setSearchQuery, filterCategory, setFilterCategory,
+    filteredFurniture, addToCanvas,
+  };
 
-      {/* Items */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {filteredFurniture.length === 0 ? (
-          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, textAlign: 'center', paddingTop: 20 }}>Tidak ditemukan</p>
-        ) : filteredFurniture.map((item) => (
-          <div key={item.id}
-            onClick={() => addToCanvas(item)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 12,
-              background: 'rgba(255,255,255,0.05)', borderRadius: 10, padding: '10px 12px',
-              cursor: 'pointer', border: '1px solid transparent', transition: 'all 0.15s',
-            }}
-            onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.borderColor = 'rgba(201,168,76,0.45)'}
-            onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.borderColor = 'transparent'}
-          >
-            {/* Emoji icon */}
-            <div style={{ width: 46, height: 46, borderRadius: 8, background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 22 }}>
-              {item.category === 'sofa' ? '🛋️' : item.category === 'meja' ? '🪑' : item.category === 'lampu' ? '💡' : item.category === 'kursi' ? '🪑' : '🪴'}
-            </div>
-            {/* Info */}
-            <div style={{ flex: 1, overflow: 'hidden' }}>
-              <p style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</p>
-              <p style={{ fontSize: 12, color: 'var(--color-gold)', fontWeight: 500 }}>{formatIDR(item.price)}</p>
-              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 1 }}>{item.category} · {item.model3d.dimensions.width}×{item.model3d.dimensions.depth}cm</p>
-            </div>
-            {/* Add button */}
-            <button style={{
-              background: 'rgba(201,168,76,0.18)', border: '1px solid rgba(201,168,76,0.35)',
-              borderRadius: 6, padding: '6px 10px', color: 'var(--color-gold)',
-              fontSize: 12, fontWeight: 700, cursor: 'pointer', flexShrink: 0, lineHeight: 1,
-            }}>
-              + Tambah
-            </button>
-          </div>
-        ))}
-      </div>
-    </>
-  );
+  const kustomPanelProps: KustomPanelProps = {
+    wallColor, setWallColor, floorType, setFloorType, lightMode, setLightMode,
+  };
 
-  // ===== CUSTOMIZATION PANEL =====
-  const KustomPanel = () => (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '16px 14px' }}>
-      {/* Wall Color */}
-      <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-gold)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 12 }}>Warna Dinding</p>
-      <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
-        {WALL_COLORS.map((c) => (
-          <button key={c.hex} title={c.name} onClick={() => setWallColor(c.hex)} style={{
-            width: 36, height: 36, borderRadius: '50%', background: c.hex, cursor: 'pointer', outline: 'none',
-            border: wallColor === c.hex ? '3px solid var(--color-gold)' : '3px solid transparent',
-            boxShadow: wallColor === c.hex ? '0 0 0 2px rgba(201,168,76,0.4)' : 'none',
-          }} />
-        ))}
-      </div>
+  const cartPanelProps: CartPanelContentProps = {
+    placedItems, selectedItemId, setSelectedItemId,
+    setMobileTab, setViewMode, handleRotate, removeItem,
+    handleAddAllToCart, totalPrice,
+  };
 
-      {/* Floor */}
-      <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-gold)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 10 }}>Jenis Lantai</p>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
-        {FLOOR_TYPES.map((f) => (
-          <button key={f} onClick={() => setFloorType(f.toLowerCase())} style={{
-            padding: '7px 14px', borderRadius: 8, border: '1px solid',
-            borderColor: floorType === f.toLowerCase() ? 'var(--color-gold)' : 'rgba(255,255,255,0.2)',
-            background: floorType === f.toLowerCase() ? 'var(--color-gold)' : 'rgba(255,255,255,0.05)',
-            color: floorType === f.toLowerCase() ? '#1A1A2E' : 'rgba(255,255,255,0.7)',
-            fontSize: 13, fontWeight: 600, cursor: 'pointer',
-          }}>{f}</button>
-        ))}
-      </div>
-
-      {/* Lighting */}
-      <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-gold)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 10 }}>Pencahayaan</p>
-      <div style={{ display: 'flex', gap: 8 }}>
-        {LIGHTING_OPTIONS.map((l) => (
-          <button key={l} onClick={() => setLightMode(l)} style={{
-            padding: '7px 14px', borderRadius: 8, border: '1px solid',
-            borderColor: lightMode === l ? 'var(--color-gold)' : 'rgba(255,255,255,0.2)',
-            background: lightMode === l ? 'var(--color-gold)' : 'rgba(255,255,255,0.05)',
-            color: lightMode === l ? '#1A1A2E' : 'rgba(255,255,255,0.7)',
-            fontSize: 13, fontWeight: 600, cursor: 'pointer',
-          }}>{l}</button>
-        ))}
-      </div>
-    </div>
-  );
-
-  // ===== CART PANEL =====
-  const CartPanelContent = () => (
-    <>
-      <div style={{ flex: 1, overflowY: 'auto', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {/* Selected position info */}
-        {placedItems.length > 0 && selectedItemId && (() => {
-          const sel = placedItems.find((i) => i.id === selectedItemId);
-          return sel ? (
-            <div style={{ padding: '8px 10px', background: 'rgba(201,168,76,0.1)', borderRadius: 8, border: '1px solid rgba(201,168,76,0.2)', marginBottom: 4 }}>
-              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', marginBottom: 2 }}>Posisi Dipilih</p>
-              <p style={{ fontSize: 12, color: 'var(--color-gold)', fontFamily: 'monospace' }}>X: {sel.position[0].toFixed(1)}m &nbsp; Z: {sel.position[2].toFixed(1)}m</p>
-            </div>
-          ) : null;
-        })()}
-
-        {placedItems.length === 0 ? (
-          <div style={{ textAlign: 'center', paddingTop: 24 }}>
-            <p style={{ fontSize: 28, marginBottom: 8 }}>🛋️</p>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>Belum ada furniture di canvas</p>
-            <button onClick={() => setMobileTab('shop')} style={{
-              marginTop: 12, padding: '8px 16px', background: 'rgba(201,168,76,0.15)',
-              border: '1px solid rgba(201,168,76,0.3)', borderRadius: 8,
-              color: 'var(--color-gold)', fontSize: 13, cursor: 'pointer',
-            }}>Buka Shop →</button>
-          </div>
-        ) : placedItems.map((item) => {
-          const product = FURNITURE.find((f) => f.id === item.productId);
-          if (!product) return null;
-          return (
-            <div key={item.id}
-              style={{
-                background: selectedItemId === item.id ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.05)',
-                borderRadius: 10, padding: '11px 12px',
-                border: selectedItemId === item.id ? '1px solid rgba(201,168,76,0.35)' : '1px solid transparent',
-                cursor: 'pointer', transition: 'all 0.15s',
-              }}
-              onClick={() => setSelectedItemId(item.id)}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 2, lineHeight: 1.3 }}>{product.name}</p>
-                  <p style={{ fontSize: 12, color: 'var(--color-gold)' }}>{formatIDR(product.price)}</p>
-                  <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2, fontFamily: 'monospace' }}>
-                    ({item.position[0].toFixed(1)}, {item.position[2].toFixed(1)})
-                  </p>
-                </div>
-                <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                  <button onClick={(e) => { e.stopPropagation(); handleRotate(item.id); setSelectedItemId(item.id); }}
-                    title="Putar 90°"
-                    style={{ background: 'rgba(201,168,76,0.15)', border: 'none', borderRadius: 6, padding: '5px 7px', color: 'var(--color-gold)', cursor: 'pointer' }}>
-                    <RotateCw size={12} />
-                  </button>
-                  <button onClick={(e) => { e.stopPropagation(); setSelectedItemId(item.id); setViewMode('move'); }}
-                    title="Pindahkan"
-                    style={{ background: 'rgba(201,168,76,0.15)', border: 'none', borderRadius: 6, padding: '5px 7px', color: 'var(--color-gold)', cursor: 'pointer' }}>
-                    <Move size={12} />
-                  </button>
-                  <button onClick={(e) => { e.stopPropagation(); removeItem(item.id); }}
-                    style={{ background: 'rgba(255,80,80,0.1)', border: 'none', borderRadius: 6, padding: '5px 7px', color: 'rgba(255,100,100,0.7)', cursor: 'pointer' }}>
-                    <X size={12} />
-                  </button>
-                </div>
-              </div>
-              <div style={{ marginTop: 8 }}>
-                <Link href={`/furniture/${product.id}`}
-                  style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: 6, padding: '5px 10px', color: 'rgba(255,255,255,0.6)', fontSize: 11, textDecoration: 'none', width: 'fit-content' }}>
-                  <Eye size={10} /> Lihat Produk
-                </Link>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Total & CTA */}
-      <div style={{ padding: '14px', borderTop: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>Total ({placedItems.length} item)</span>
-          <span style={{ fontSize: 17, fontWeight: 700, color: 'white' }}>{formatIDR(totalPrice)}</span>
-        </div>
-        <button onClick={handleAddAllToCart} className="btn btn-primary"
-          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: placedItems.length === 0 ? 0.5 : 1 }}
-          disabled={placedItems.length === 0}>
-          <ShoppingCart size={16} /> Beli Semua Furniture
-        </button>
-      </div>
-    </>
-  );
-
-  // ===== DESKTOP — LEFT PANEL (Catalog + Customization) =====
-  const DesktopLeftPanel = () => (
-    <div className="studio-panel" style={{ width: 300, display: 'flex', flexDirection: 'column' }}>
-      <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
-        <p style={{ color: 'white', fontWeight: 700, fontSize: 15, marginBottom: 10 }}>Katalog Furniture</p>
-      </div>
-      <FurnitureList />
-      {/* Customization below list on desktop */}
-      <div style={{ padding: '14px 16px', borderTop: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
-        <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-gold)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 10 }}>Kustomisasi</p>
-        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 6 }}>Warna Dinding</p>
-        <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
-          {WALL_COLORS.map((c) => (
-            <button key={c.hex} title={c.name} onClick={() => setWallColor(c.hex)} style={{
-              width: 26, height: 26, borderRadius: '50%', background: c.hex, cursor: 'pointer', outline: 'none',
-              border: wallColor === c.hex ? '2px solid var(--color-gold)' : '2px solid transparent',
-            }} />
-          ))}
-        </div>
-        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 6 }}>Lantai</p>
-        <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
-          {FLOOR_TYPES.map((f) => (
-            <button key={f} onClick={() => setFloorType(f.toLowerCase())} style={{
-              padding: '3px 8px', borderRadius: 999, border: '1px solid',
-              borderColor: floorType === f.toLowerCase() ? 'var(--color-gold)' : 'rgba(255,255,255,0.2)',
-              background: floorType === f.toLowerCase() ? 'var(--color-gold)' : 'transparent',
-              color: floorType === f.toLowerCase() ? '#1A1A2E' : 'rgba(255,255,255,0.6)',
-              fontSize: 11, cursor: 'pointer',
-            }}>{f}</button>
-          ))}
-        </div>
-        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 6 }}>Cahaya</p>
-        <div style={{ display: 'flex', gap: 6 }}>
-          {LIGHTING_OPTIONS.map((l) => (
-            <button key={l} onClick={() => setLightMode(l)} style={{
-              padding: '3px 8px', borderRadius: 999, border: '1px solid',
-              borderColor: lightMode === l ? 'var(--color-gold)' : 'rgba(255,255,255,0.2)',
-              background: lightMode === l ? 'var(--color-gold)' : 'transparent',
-              color: lightMode === l ? '#1A1A2E' : 'rgba(255,255,255,0.6)',
-              fontSize: 11, cursor: 'pointer',
-            }}>{l}</button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  // ===== DESKTOP — RIGHT PANEL (Cart) =====
-  const DesktopRightPanel = () => (
-    <div className="studio-panel" style={{ width: 280, display: 'flex', flexDirection: 'column', borderRight: 'none', borderLeft: '1px solid rgba(255,255,255,0.1)' }}>
-      <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <ShoppingCart size={16} color="var(--color-gold)" />
-          <p style={{ color: 'white', fontWeight: 700, fontSize: 15 }}>Ringkasan Furniture</p>
-        </div>
-      </div>
-      <CartPanelContent />
-    </div>
-  );
-
-  // ===== TOP BAR =====
-  const TopBar = () => (
-    <div style={{
-      background: '#1a1a2e', borderBottom: '1px solid rgba(255,255,255,0.1)',
-      padding: isMobile ? '10px 14px' : '11px 24px',
-      display: 'flex', alignItems: 'center', gap: isMobile ? 8 : 16, flexShrink: 0,
-    }}>
-      <Link href="/studio" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5, fontSize: 14, flexShrink: 0 }}>
-        <ArrowLeft size={16} />{!isMobile && ' Studio'}
-      </Link>
-      {!isMobile && <ChevronRight size={14} color="rgba(255,255,255,0.3)" />}
-      <span style={{ color: 'white', fontWeight: 600, fontSize: isMobile ? 14 : 16, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        3D Furniture Try-On
-      </span>
-      {/* Mode toggle */}
-      <div style={{ display: 'flex', background: 'rgba(255,255,255,0.07)', borderRadius: 8, padding: 3, gap: 3, flexShrink: 0 }}>
-        {([
-          { mode: 'view' as ViewMode, Icon: MousePointer, label: 'Kamera' },
-          { mode: 'move' as ViewMode, Icon: Move, label: 'Pindah' },
-        ]).map(({ mode, Icon, label }) => (
-          <button key={mode} onClick={() => setViewMode(mode)} title={label} style={{
-            display: 'flex', alignItems: 'center', gap: 5,
-            padding: isMobile ? '5px 9px' : '6px 12px',
-            borderRadius: 6, border: 'none',
-            background: viewMode === mode ? 'rgba(201,168,76,0.25)' : 'transparent',
-            color: viewMode === mode ? '#C9A84C' : 'rgba(255,255,255,0.5)',
-            cursor: 'pointer', fontSize: 12, fontWeight: viewMode === mode ? 700 : 400,
-          }}>
-            <Icon size={13} />{!isMobile && ` ${label}`}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
-  // ===== MOBILE BOTTOM SHEET — 3 TABS =====
-  const TABS: { id: MobileTab; label: string; icon: React.ReactNode; badge?: number }[] = [
-    { id: 'shop', label: 'Shop', icon: <Store size={15} /> },
-    { id: 'kustom', label: 'Kustomisasi', icon: <Paintbrush size={15} /> },
-    { id: 'keranjang', label: 'Keranjang', icon: <ShoppingCart size={15} />, badge: placedItems.length },
-  ];
-
-  const BOTTOM_PANEL_HEIGHT = '62vh';
-
-  const MobileBottomSheet = () => (
-    <div style={{
-      position: 'fixed', bottom: 0, left: 0, right: 0,
-      background: '#1a1a2e',
-      borderTop: '2px solid rgba(255,255,255,0.1)',
-      zIndex: 200,
-      borderRadius: '18px 18px 0 0',
-      maxHeight: mobileTab ? BOTTOM_PANEL_HEIGHT : 'auto',
-      display: 'flex', flexDirection: 'column',
-      transition: 'max-height 0.3s cubic-bezier(0.4,0,0.2,1)',
-      boxShadow: '0 -8px 40px rgba(0,0,0,0.5)',
-    }}>
-      {/* Tab Bar */}
-      <div style={{ display: 'flex', flexShrink: 0 }}>
-        {TABS.map(({ id, label, icon, badge }) => (
-          <button key={id} onClick={() => setMobileTab(mobileTab === id ? null : id)} style={{
-            flex: 1, padding: '13px 6px 10px',
-            background: 'transparent', border: 'none',
-            borderBottom: mobileTab === id ? '2px solid var(--color-gold)' : '2px solid transparent',
-            color: mobileTab === id ? 'var(--color-gold)' : 'rgba(255,255,255,0.45)',
-            fontSize: 12, fontWeight: 600, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
-            position: 'relative',
-          }}>
-            {icon} {label}
-            {/* Badge */}
-            {(badge !== undefined && badge > 0) && (
-              <span style={{
-                position: 'absolute', top: 8, right: '22%',
-                background: '#C9A84C', color: '#1A1A2E',
-                borderRadius: '50%', width: 16, height: 16,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 9, fontWeight: 800, lineHeight: 1,
-              }}>{badge}</span>
-            )}
-            {/* Chevron */}
-            {mobileTab === id
-              ? <ChevronDown size={12} style={{ opacity: 0.6 }} />
-              : <ChevronUp size={12} style={{ opacity: 0.4 }} />
-            }
-          </button>
-        ))}
-      </div>
-
-      {/* Content */}
-      {mobileTab && (
-        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          {mobileTab === 'shop' && <FurnitureList compact />}
-          {mobileTab === 'kustom' && <KustomPanel />}
-          {mobileTab === 'keranjang' && <CartPanelContent />}
-        </div>
-      )}
-    </div>
-  );
-
-  // ===== CENTER CANVAS AREA =====
-  const CanvasCenter = ({ extraPaddingBottom }: { extraPaddingBottom?: string }) => (
-    <div style={{ flex: 1, position: 'relative', background: '#2d2d4e', overflow: 'hidden', paddingBottom: extraPaddingBottom }}>
-      {/* Mode badge */}
-      <div style={{
-        position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
-        zIndex: 10, pointerEvents: 'none',
-        background: isDragMode ? 'rgba(201,168,76,0.2)' : 'rgba(0,0,0,0.45)',
-        border: `1px solid ${isDragMode ? 'rgba(201,168,76,0.5)' : 'rgba(255,255,255,0.12)'}`,
-        borderRadius: 20, padding: '5px 14px',
-        display: 'flex', alignItems: 'center', gap: 6,
-        backdropFilter: 'blur(8px)', whiteSpace: 'nowrap',
-      }}>
-        {isDragMode
-          ? <><Move size={11} color="#C9A84C" /><span style={{ fontSize: 11, color: '#C9A84C', fontWeight: 600 }}>Mode Pindah — seret furniture</span></>
-          : <><MousePointer size={11} color="rgba(255,255,255,0.6)" /><span style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>Mode Kamera — seret untuk putar</span></>
-        }
-      </div>
-
-      <Studio3DCanvas {...canvasProps} />
-
-      {placedItems.length === 0 && (
-        <div style={{
-          position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', textAlign: 'center',
-        }}>
-          <div style={{ opacity: 0.4 }}>
-            <p style={{ fontSize: 30, marginBottom: 10 }}>🛋️</p>
-            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: isMobile ? 13 : 15, fontWeight: 500 }}>
-              {isMobile ? 'Buka Shop di bawah untuk menambah furniture' : 'Pilih furniture dari katalog untuk ditempatkan'}
-            </p>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  const canvasCenterProps: CanvasCenterProps = {
+    isDragMode, isMobile, placedItems, canvasProps,
+  };
 
   // ===== DESKTOP LAYOUT =====
   if (!isMobile) {
     return (
       <div style={{ height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column', background: '#1a1a2e', overflow: 'hidden' }}>
-        <TopBar />
+        <TopBar isMobile={isMobile} viewMode={viewMode} setViewMode={setViewMode} />
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
-          <DesktopLeftPanel />
-          <CanvasCenter />
-          <DesktopRightPanel />
+          <DesktopLeftPanel {...furnitureListProps} {...kustomPanelProps} />
+          <CanvasCenter {...canvasCenterProps} />
+          <DesktopRightPanel {...cartPanelProps} />
         </div>
       </div>
     );
@@ -759,9 +860,16 @@ export default function Furniture3DPage() {
   // ===== MOBILE LAYOUT =====
   return (
     <div style={{ height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column', background: '#1a1a2e', overflow: 'hidden', position: 'relative' }}>
-      <TopBar />
-      <CanvasCenter extraPaddingBottom={mobileTab ? BOTTOM_PANEL_HEIGHT : '56px'} />
-      <MobileBottomSheet />
+      <TopBar isMobile={isMobile} viewMode={viewMode} setViewMode={setViewMode} />
+      <CanvasCenter {...canvasCenterProps} extraPaddingBottom={mobileTab ? '62vh' : '56px'} />
+      <MobileBottomSheet
+        mobileTab={mobileTab}
+        setMobileTab={setMobileTab}
+        placedItems={placedItems}
+        furnitureListProps={furnitureListProps}
+        kustomPanelProps={kustomPanelProps}
+        cartPanelProps={cartPanelProps}
+      />
     </div>
   );
 }

@@ -1,0 +1,88 @@
+﻿node.exe : ΓÜá Attempted to load @next/swc-win32-x64-msvc, but an error occurred: 
+\\?\C:\laragon\www\pembangunancerdasliving\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node is not a 
+valid Win32 application.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ΓÜá Attempted t...32 application.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+\\?\C:\laragon\www\pembangunancerdasliving\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node
+  Skipping creating a lockfile at C:\laragon\www\pembangunancerdasliving\.next\lock because we're using WASM bindings
+Γû▓ Next.js 16.2.2 (webpack)
+
+  Creating an optimized production build ...
+ΓÜá Attempted to load @next/swc-win32-x64-msvc, but an error occurred: 
+\\?\C:\laragon\www\pembangunancerdasliving\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node is not a 
+valid Win32 application.
+\\?\C:\laragon\www\pembangunancerdasliving\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node
+ΓÜá Attempted to load @next/swc-win32-x64-msvc, but an error occurred: 
+\\?\C:\laragon\www\pembangunancerdasliving\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node is not a 
+valid Win32 application.
+\\?\C:\laragon\www\pembangunancerdasliving\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node
+ΓÜá Attempted to load @next/swc-win32-x64-msvc, but an error occurred: 
+\\?\C:\laragon\www\pembangunancerdasliving\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node is not a 
+valid Win32 application.
+\\?\C:\laragon\www\pembangunancerdasliving\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node
+Γ£ô Compiled successfully in 29.9s
+  Running TypeScript ...
+ΓÜá Attempted to load @next/swc-win32-x64-msvc, but an error occurred: 
+\\?\C:\laragon\www\pembangunancerdasliving\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node is not a 
+valid Win32 application.
+\\?\C:\laragon\www\pembangunancerdasliving\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node
+  Finished TypeScript in 41s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/27) ...
+ΓÜá Attempted to load @next/swc-win32-x64-msvc, but an error occurred: 
+\\?\C:\laragon\www\pembangunancerdasliving\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node is not a 
+valid Win32 application.
+\\?\C:\laragon\www\pembangunancerdasliving\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node
+ΓÜá Attempted to load @next/swc-win32-x64-msvc, but an error occurred: 
+\\?\C:\laragon\www\pembangunancerdasliving\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node is not a 
+valid Win32 application.
+\\?\C:\laragon\www\pembangunancerdasliving\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node
+  Generating static pages using 7 workers (6/27) 
+  Generating static pages using 7 workers (13/27) 
+  Generating static pages using 7 workers (20/27) 
+Γ£ô Generating static pages using 7 workers (27/27) in 12.8s
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+Γöî Γùï /
+Γö£ Γùï /_not-found
+Γö£ ╞Æ /api/auth/login
+Γö£ ╞Æ /api/auth/logout
+Γö£ ╞Æ /api/track
+Γö£ Γùï /auth/login
+Γö£ Γùï /auth/logout
+Γö£ Γùï /auth/register
+Γö£ Γùï /bisnis
+Γö£ Γùï /bisnis/canvas
+Γö£ Γùï /bisnis/login
+Γö£ Γùï /bisnis/tracking
+Γö£ Γùï /cart
+Γö£ Γùï /checkout
+Γö£ Γùï /checkout/success
+Γö£ Γùï /fashion
+Γö£ ╞Æ /fashion/[id]
+Γö£ Γùï /furniture
+Γö£ ╞Æ /furniture/[id]
+Γö£ Γùï /properti
+Γö£ ΓùÅ /properti/[id]
+Γöé Γö£ /properti/prop-001
+Γöé Γö£ /properti/prop-002
+Γöé Γö£ /properti/prop-003
+Γöé Γöö [+5 more paths]
+Γö£ Γùï /studio
+Γö£ Γùï /studio/fashion-avatar
+Γö£ ╞Æ /studio/floor-planner/[projectId]
+Γöö ╞Æ /studio/furniture-3d/[projectId]
+
+
+╞Æ Proxy (Middleware)
+
+Γùï  (Static)   prerendered as static content
+ΓùÅ  (SSG)      prerendered as static HTML (uses generateStaticParams)
+╞Æ  (Dynamic)  server-rendered on demand
+

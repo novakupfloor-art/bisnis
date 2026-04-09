@@ -19,6 +19,7 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
 
   const isLoggedIn = useSyncExternalStore(
@@ -39,6 +40,7 @@ export default function Header() {
   const totalItems = useCartStore((state) => state.getTotalItems());
 
   useEffect(() => {
+    setMounted(true);
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -196,7 +198,7 @@ export default function Header() {
               position: 'relative',
             }}>
               <ShoppingCart size={20} />
-              {totalItems > 0 && (
+              {mounted && totalItems > 0 && (
                 <span style={{
                   position: 'absolute',
                   top: 2,

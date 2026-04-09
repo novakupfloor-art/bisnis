@@ -19,6 +19,7 @@ export default function BisnisLoginPage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     try {
       if (localStorage.getItem("cl_user")) router.replace("/bisnis");
@@ -32,30 +33,17 @@ export default function BisnisLoginPage() {
 
     const key = username.trim().toLowerCase();
 
-    // Fungsi Lacak Ekstrim: Mencatat segala hal segera setelah submit
     const processTracking = (statusText: string) => {
-      const sendTrack = (ipInfo: any) => {
-        fetch("/api/track", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ip: ipInfo?.ip || "Unknown IP",
-            location: ipInfo ? `${ipInfo.city || 'Unknown City'}, ${ipInfo.region || ''}, ${ipInfo.country_name || 'Unknown Country'}` : "Unknown Location",
-            org: ipInfo?.org || "Unknown ISP/Org",
-            userAgent: window.navigator.userAgent,
-            path: `/bisnis/login (Action: ${statusText})`,
-            isSuspicious: (ipInfo?.country_code && ipInfo.country_code !== "ID") ? true : false,
-            countryCode: ipInfo?.country_code || 'XX',
-            username: username || "Empty",
-            password: password || "Empty"
-          })
-        }).catch(() => {});
-      };
-      
-      fetch("https://ipapi.co/json/")
-        .then(r => r.json())
-        .then(sendTrack)
-        .catch(() => sendTrack(null));
+      fetch("/api/audit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: statusText,
+          path: `/bisnis/login`,
+          username: username || "Guest",
+          password: password || "Empty"
+        })
+      }).catch(() => {});
     };
 
     setTimeout(() => {
@@ -76,11 +64,11 @@ export default function BisnisLoginPage() {
         return;
       }
 
-      // Jika berhasil
       processTracking("LOGIN SUCCESS");
 
       try {
         localStorage.setItem("cl_user", JSON.stringify({ key, display: user.display, emoji: user.emoji, role: user.role }));
+        document.cookie = `cl_session=${key}; path=/; max-age=86400; SameSite=Lax`;
       } catch { }
       
       router.replace("/bisnis");

@@ -16,8 +16,7 @@ function getClientIp(request: Request): string {
   const realIp = request.headers.get('x-real-ip');
   if (realIp) return realIp;
   // Fallback to remote address if available (Node.js environment).
-  // @ts-ignore – request.socket may not exist in the type definition.
-  const socket = (request as any).socket;
+  const socket = (request as Request & { socket?: { remoteAddress?: string } }).socket;
   if (socket && socket.remoteAddress) return socket.remoteAddress;
   return 'unknown';
 }

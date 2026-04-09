@@ -5,17 +5,22 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
 export default function AuthCtaHome() {
-  const [isMounted, setIsMounted] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [state, setState] = useState<{ mounted: boolean; isLoggedIn: boolean }>({
+    mounted: false,
+    isLoggedIn: false,
+  });
 
   useEffect(() => {
-    setIsMounted(true);
+    let isLoggedIn = false;
     try {
-      if (localStorage.getItem('cl_user')) setIsLoggedIn(true);
+      isLoggedIn = !!localStorage.getItem('cl_user');
     } catch {}
+    // Single setState call – tidak ada cascading render
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setState({ mounted: true, isLoggedIn });
   }, []);
 
-  if (!isMounted) return <div style={{ height: 60 }} />;
+  if (!state.mounted) return <div style={{ height: 60 }} />;
 
   return (
     <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -23,7 +28,7 @@ export default function AuthCtaHome() {
         Jelajahi Properti <ArrowRight size={18} />
       </Link>
       
-      {isLoggedIn ? (
+      {state.isLoggedIn ? (
         <Link href="/bisnis" className="btn btn-lg" style={{
           background: 'var(--color-primary)',
           color: 'white',

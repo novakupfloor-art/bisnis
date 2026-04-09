@@ -16,7 +16,7 @@ export default function AntiScreenshot() {
         // Attempt to clear clipboard only if user interaction allowed
         try {
           navigator.clipboard.writeText('');
-        } catch (err) {
+        } catch {
           // Silently ignore – clipboard access may be blocked without user activation
         }
         alert('Fitur screenshot dan copy dinonaktifkan demi keamanan.');
@@ -38,7 +38,7 @@ export default function AntiScreenshot() {
       if (e.key === 'PrintScreen') {
         try {
           navigator.clipboard.writeText('');
-        } catch (err) {
+        } catch {
           // ignore clipboard permission errors
         }
       }
@@ -58,8 +58,7 @@ export default function AntiScreenshot() {
     // Mencegah block selection melalui CSS pada body
     document.body.style.userSelect = 'none';
     // Note: correct property name is lowercase 'webkitUserSelect'
-    // @ts-ignore
-    (document.body.style as any).webkitUserSelect = 'none';
+    (document.body.style as CSSStyleDeclaration & { webkitUserSelect: string }).webkitUserSelect = 'none';
 
     return () => {
       document.removeEventListener('contextmenu', handleContextMenu);
@@ -67,8 +66,7 @@ export default function AntiScreenshot() {
       document.removeEventListener('keyup', handleKeyUp);
       document.removeEventListener('copy', handleCopy);
       document.body.style.userSelect = '';
-      // @ts-ignore
-      (document.body.style as any).webkitUserSelect = '';
+      (document.body.style as CSSStyleDeclaration & { webkitUserSelect: string }).webkitUserSelect = '';
     };
   }, []);
 

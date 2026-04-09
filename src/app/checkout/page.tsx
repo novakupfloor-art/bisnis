@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/useCartStore';
 import { formatIDR } from '@/lib/utils';
-import { ChevronRight, ArrowLeft, CreditCard, Wallet, Building2, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, CreditCard, Wallet, Building2, CheckCircle2 } from 'lucide-react';
 import config from '@/lib/config';
 
 export default function CheckoutPage() {
@@ -28,6 +28,7 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState('bank_transfer');
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
     // Jika tidak ada item di keranjang tapi bukan SSR, redirect kembali
     const hasItems = useCartStore.getState().items.length > 0;

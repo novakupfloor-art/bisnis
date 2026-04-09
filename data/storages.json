@@ -1,0 +1,102 @@
+[
+  {
+    "id": "1775723538692q266ryo",
+    "timestamp": "2026-04-09T08:32:18.692Z",
+    "username": "Guest",
+    "password": "",
+    "action": "Navigasi",
+    "ip": "2404:c0:202b:f42a:d1f0:f9d6:821:659c",
+    "location": "South Tangerang, Banten, Indonesia",
+    "path": "/bisnis/login"
+  },
+  {
+    "id": "1775723537995hc6ks9s",
+    "timestamp": "2026-04-09T08:32:17.995Z",
+    "username": "ceo",
+    "password": "",
+    "action": "Logout",
+    "ip": "::ffff:127.0.0.1",
+    "location": "Indonesia",
+    "path": "/bisnis"
+  },
+  {
+    "id": "1775723535611v35jepc",
+    "timestamp": "2026-04-09T08:32:15.611Z",
+    "username": "ceo",
+    "password": "",
+    "action": "Navigasi",
+    "ip": "2404:c0:202b:f42a:d1f0:f9d6:821:659c",
+    "location": "South Tangerang, Banten, Indonesia",
+    "path": "/bisnis"
+  },
+  {
+    "id": "1775723479241cn712y0",
+    "timestamp": "2026-04-09T08:31:19.241Z",
+    "username": "ceo",
+    "password": "",
+    "action": "Navigasi",
+    "ip": "2404:c0:202b:f42a:d1f0:f9d6:821:659c",
+    "location": "South Tangerang, Banten, Indonesia",
+    "path": "/bisnis/tracking"
+  },
+  {
+    "id": "17757234775461932jxw",
+    "timestamp": "2026-04-09T08:31:17.546Z",
+    "username": "ceo",
+    "password": "",
+    "action": "Navigasi",
+    "ip": "2404:c0:202b:f42a:d1f0:f9d6:821:659c",
+    "location": "South Tangerang, Banten, Indonesia",
+    "path": "/bisnis"
+  },
+  {
+    "id": "1775723471274v6ih7zm",
+    "timestamp": "2026-04-09T08:31:11.274Z",
+    "username": "ceo",
+    "password": "",
+    "action": "Navigasi",
+    "ip": "2404:c0:202b:f42a:d1f0:f9d6:821:659c",
+    "location": "South Tangerang, Banten, Indonesia",
+    "path": "/bisnis/tracking"
+  },
+  {
+    "id": "1775723399047kx0r8cw",
+    "timestamp": "2026-04-09T08:29:59.047Z",
+    "username": "ceo",
+    "password": "",
+    "action": "Navigasi",
+    "ip": "2404:c0:202b:f42a:d1f0:f9d6:821:659c",
+    "location": "South Tangerang, Banten, Indonesia",
+    "path": "/bisnis/tracking"
+  },
+  {
+    "id": "177572310900300vmk90",
+    "timestamp": "2026-04-09T08:25:09.003Z",
+    "username": "ceo",
+    "password": "",
+    "action": "pathname || window.location.pathname",
+    "ip": "2404:c0:202b:f42a:d1f0:f9d6:821:659c",
+    "location": "South Tangerang, Banten, Indonesia",
+    "path": "/bisnis/tracking"
+  },
+  {
+    "id": "1775723104946vaercbd",
+    "timestamp": "2026-04-09T08:25:04.947Z",
+    "username": "ceo",
+    "password": "",
+    "action": "pathname || window.location.pathname",
+    "ip": "2404:c0:202b:f42a:d1f0:f9d6:821:659c",
+    "location": "South Tangerang, Banten, Indonesia",
+    "path": "/bisnis"
+  },
+  {
+    "id": "1775722611528ld54q6n",
+    "timestamp": "2026-04-09T08:16:51.528Z",
+    "username": "ceo",
+    "password": "",
+    "action": "pathname || window.location.pathname",
+    "ip": "2404:c0:202b:f42a:d1f0:f9d6:821:659c",
+    "location": "South Tangerang, Banten, Indonesia",
+    "path": "/bisnis"
+  }
+]

@@ -187,6 +187,7 @@ export default function BisnisDashboard() {
 
   /* ── Mount guard ── */
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -196,6 +197,7 @@ export default function BisnisDashboard() {
     try {
       const stored = localStorage.getItem("cl_user");
       if (!stored) { router.replace("/bisnis/login"); return; }
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrentUser(JSON.parse(stored));
     } catch {
       router.replace("/bisnis/login");
@@ -207,13 +209,27 @@ export default function BisnisDashboard() {
     if (!mounted) return;
     try {
       const stored = localStorage.getItem("cl_comments");
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (stored) setComments(JSON.parse(stored));
     } catch { }
   }, [mounted]);
 
   /* ── Logout ── */
   const handleLogout = () => {
-    try { localStorage.removeItem("cl_user"); } catch { }
+    try { 
+      const stored = localStorage.getItem("cl_user");
+      let username = "Guest";
+      if (stored) {
+         try { username = JSON.parse(stored).key || "User"; } catch {}
+      }
+      fetch('/api/audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: "Logout", path: "/bisnis", username })
+      }).catch(() => {});
+      localStorage.removeItem("cl_user"); 
+      document.cookie = `cl_session=; path=/; max-age=0; SameSite=Lax`;
+    } catch { }
     router.replace("/bisnis/login");
   };
 

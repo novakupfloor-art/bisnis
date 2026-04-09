@@ -23,6 +23,15 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (data.success) {
+        // Simpan sesi ke localStorage agar AuthGuard mengenali user
+        try {
+          localStorage.setItem('cl_user', JSON.stringify({
+            key: form.email,
+            display: form.email.split('@')[0],
+            emoji: '👤',
+            role: 'member',
+          }));
+        } catch { }
         router.push('/');
       } else {
         // Clear any stale session data on failed login

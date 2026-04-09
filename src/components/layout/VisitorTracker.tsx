@@ -9,45 +9,58 @@ import { pushLoginLog } from '@/lib/loginLog';
  * Captured fields: username (from cl_user), IP, location, ISP, user‑agent,
  * current path, suspicion flag, and timestamp.
  */
+interface IpInfo {
+  ip?: string;
+  city?: string;
+  region?: string;
+  country_name?: string;
+  country_code?: string;
+  org?: string;
+}
+
 export default function VisitorTracker() {
   const pathname = usePathname();
 
   useEffect(() => {
     const track = async () => {
       try {
-        // Fetch IP and geo info – tolerant to failures.
-        let ipInfo: any = null;
+        let ipInfo: IpInfo | null = null;
         try {
-          const res = await fetch('https://ipapi.co/json/');
-          ipInfo = await res.json();
-        } catch (e) {
-          console.error('IP lookup failed', e);
-        }
-
-        const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown';
-        const isForeign = ipInfo?.country_code && ipInfo.country_code !== 'ID';
-        const isBot = /bot|crawl|spider/i.test(userAgent);
-        const isSuspicious = isForeign || isBot;
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 1200);
+          const res = await fetch('https://ipapi.co/json/', { signal: controller.signal });
+          clearTimeout(timeoutId);
+          if (res.ok) {
+            ipInfo = await res.json() as IpInfo;
+          }
+        } catch { } // fail fast silently on network/timeout error
 
         const storedUser = typeof window !== 'undefined' ? localStorage.getItem('cl_user') : null;
-        const username = storedUser || 'Unknown';
+        let username = 'Guest';
+        if (storedUser) {
+          try {
+            username = JSON.parse(storedUser).key || 'User';
+          } catch { }
+        }
+
+        const locationStr = ipInfo && ipInfo.city
+          ? `${ipInfo.city}, ${ipInfo.region || ''}, ${ipInfo.country_name || ''}`
+          : 'Indonesia';
 
         const payload = {
-          username,
-          ip: ipInfo?.ip || 'Unknown IP',
-          location: ipInfo
-            ? `${ipInfo.city || 'Unknown City'}, ${ipInfo.region || ''}, ${ipInfo.country_name || 'Unknown Country'}`
-            : 'Unknown Location',
-          org: ipInfo?.org || 'Unknown ISP/Org',
-          userAgent,
+          action: "Navigasi",
           path: pathname || window.location.pathname,
-          isSuspicious,
-          countryCode: ipInfo?.country_code || 'XX',
-          timestamp: new Date().toISOString(),
+          username: username,
+          ip: ipInfo?.ip || "Unknown IP",
+          location: locationStr
         };
 
-        // Store the visit log locally (same array used for login logs).
-        pushLoginLog(payload);
+        fetch('/api/audit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          keepalive: true
+        }).catch(() => { });
       } catch (err) {
         console.error('VisitorTracker error', err);
       }

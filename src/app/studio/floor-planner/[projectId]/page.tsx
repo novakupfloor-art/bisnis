@@ -26,6 +26,396 @@ const TOOLS = [
 
 type Tool = 'draw' | 'move' | 'door' | 'delete';
 
+// ===== TOP BAR (extracted outside render) =====
+interface TopBarProps {
+  isMobile: boolean;
+}
+
+function TopBar({ isMobile }: TopBarProps) {
+  return (
+    <div style={{
+      background: '#1a1a2e',
+      borderBottom: '1px solid rgba(255,255,255,0.1)',
+      padding: isMobile ? '10px 16px' : '12px 24px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: isMobile ? 8 : 16,
+      flexShrink: 0,
+    }}>
+      <Link href="/studio" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, flexShrink: 0 }}>
+        <ArrowLeft size={16} /> {!isMobile && 'Studio'}
+      </Link>
+      {!isMobile && <ChevronRight size={14} color="rgba(255,255,255,0.3)" />}
+      <span style={{ color: 'white', fontWeight: 600, fontSize: isMobile ? 14 : 16, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        Designer Denah Lantai
+      </span>
+      {!isMobile && (
+        <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>— klik-seret untuk menggambar ruangan</span>
+      )}
+      <div style={{ marginLeft: isMobile ? 0 : 'auto', display: 'flex', gap: 8, flexShrink: 0 }}>
+        <Link href="/studio/furniture-3d/demo" className="btn btn-primary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Box size={14} /> {isMobile ? '3D' : 'Lanjut ke 3D'}
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// ===== DESKTOP PANEL (extracted outside render) =====
+interface DesktopPanelProps {
+  activeTool: Tool;
+  setActiveTool: (t: Tool) => void;
+  activeRoomType: RoomType;
+  selectedRoom: Room | undefined;
+  updateSelectedRoomDims: (w: number, h: number) => void;
+  spawnRoom: (type: RoomType, defaultW: number, defaultH: number) => void;
+  setRooms: (fn: (prev: Room[]) => Room[]) => void;
+  setSelectedRoomId: (id: string | null) => void;
+}
+
+function DesktopPanel({ activeTool, setActiveTool, activeRoomType, selectedRoom, updateSelectedRoomDims, spawnRoom, setRooms, setSelectedRoomId }: DesktopPanelProps) {
+  return (
+    <div className="studio-panel" style={{ width: 240, padding: 20, display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {/* Tools */}
+      <div>
+        <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-gold)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 12 }}>ALAT</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {TOOLS.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTool(id as Tool)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '10px 14px', borderRadius: 'var(--radius-md)',
+                border: 'none',
+                background: activeTool === id ? 'rgba(201,168,76,0.2)' : 'transparent',
+                color: activeTool === id ? 'var(--color-gold)' : 'rgba(255,255,255,0.7)',
+                cursor: 'pointer', fontSize: 14,
+                fontWeight: activeTool === id ? 600 : 400,
+                transition: 'var(--transition)', width: '100%', textAlign: 'left',
+                borderLeft: activeTool === id ? '2px solid var(--color-gold)' : '2px solid transparent',
+              }}
+            >
+              <Icon size={16} /> {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Selected Room Edit */}
+      {selectedRoom && (
+        <div style={{ background: 'rgba(201,168,76,0.1)', borderRadius: 'var(--radius-md)', padding: '12px 14px', border: '1px solid rgba(201,168,76,0.3)' }}>
+          <p style={{ fontSize: 11, color: 'var(--color-gold)', fontWeight: 600, marginBottom: 4 }}>DIPILIH</p>
+          <p style={{ fontSize: 15, color: 'white', fontWeight: 600 }}>{selectedRoom.label}</p>
+          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+            <label style={{ flex: 1 }}>
+              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 4 }}>Lebar (X) = m</span>
+              <input type="number" value={selectedRoom.width * 0.5}
+                onChange={(e) => updateSelectedRoomDims(parseFloat(e.target.value) || 0.5, selectedRoom.height * 0.5)}
+                style={{ width: '100%', padding: '6px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--color-gold)', borderRadius: 4, fontSize: 13, fontWeight: 600 }}
+                step="0.5" min="1" />
+            </label>
+            <label style={{ flex: 1 }}>
+              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 4 }}>Panjang (Y) = m</span>
+              <input type="number" value={selectedRoom.height * 0.5}
+                onChange={(e) => updateSelectedRoomDims(selectedRoom.width * 0.5, parseFloat(e.target.value) || 0.5)}
+                style={{ width: '100%', padding: '6px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--color-gold)', borderRadius: 4, fontSize: 13, fontWeight: 600 }}
+                step="0.5" min="1" />
+            </label>
+          </div>
+        </div>
+      )}
+
+      {/* Room Types */}
+      <div>
+        <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-gold)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 12 }}>TIPE RUANGAN</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {ROOM_TYPES.map(({ type, label, defaultW, defaultH }) => (
+            <button
+              key={type}
+              onClick={() => spawnRoom(type, defaultW, defaultH)}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: 'none',
+                background: activeRoomType === type && activeTool === 'draw' ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.04)',
+                color: activeRoomType === type && activeTool === 'draw' ? 'var(--color-gold)' : 'rgba(255,255,255,0.7)',
+                cursor: 'pointer', fontSize: 13, transition: 'var(--transition)', width: '100%',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 10, height: 10, borderRadius: 2, background: getRoomColor(type), border: '1px solid rgba(255,255,255,0.2)' }} />
+                {label}
+              </div>
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{defaultW * 0.5}×{defaultH * 0.5}m</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Scale */}
+      <div>
+        <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 12 }}>SKALA</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {[['—', '1 kotak = 0.5 m'], ['——', '2 kotak = 1 m'], ['————', '4 kotak = 2 m']].map(([line, lbl]) => (
+            <div key={lbl} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>
+              <span style={{ color: 'rgba(255,255,255,0.6)', fontFamily: 'monospace' }}>{line}</span>
+              {lbl}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <button className="btn btn-primary" style={{ width: '100%', display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
+          <Save size={14} /> Simpan Desain
+        </button>
+        <button
+          onClick={() => { setRooms(() => []); setSelectedRoomId(null); }}
+          style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid rgba(255,255,255,0.15)', background: 'transparent', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+        >
+          <RotateCcw size={14} /> Reset Semua
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ===== MOBILE BOTTOM SHEET (extracted outside render) =====
+interface MobileBottomSheetProps {
+  mobilePanel: 'tools' | 'rooms' | null;
+  setMobilePanel: (p: 'tools' | 'rooms' | null) => void;
+  rooms: Room[];
+  activeTool: Tool;
+  setActiveTool: (t: Tool) => void;
+  selectedRoom: Room | undefined;
+  updateSelectedRoomDims: (w: number, h: number) => void;
+  spawnRoom: (type: RoomType, defaultW: number, defaultH: number) => void;
+  setRooms: (fn: (prev: Room[]) => Room[]) => void;
+  setSelectedRoomId: (id: string | null) => void;
+}
+
+function MobileBottomSheet({ mobilePanel, setMobilePanel, rooms, activeTool, setActiveTool, selectedRoom, updateSelectedRoomDims, spawnRoom, setRooms, setSelectedRoomId }: MobileBottomSheetProps) {
+  return (
+    <div style={{
+      position: 'fixed', bottom: 0, left: 0, right: 0,
+      background: '#1a1a2e',
+      borderTop: '1px solid rgba(255,255,255,0.15)',
+      zIndex: 100,
+      borderRadius: '16px 16px 0 0',
+      maxHeight: mobilePanel ? '55vh' : 'auto',
+      display: 'flex',
+      flexDirection: 'column',
+      transition: 'max-height 0.3s ease',
+      boxShadow: '0 -8px 32px rgba(0,0,0,0.4)',
+    }}>
+      {/* Tab Bar */}
+      <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
+        {(['tools', 'rooms'] as const).map((panel) => (
+          <button
+            key={panel}
+            onClick={() => setMobilePanel(mobilePanel === panel ? null : panel)}
+            style={{
+              flex: 1, padding: '12px 8px', background: 'transparent', border: 'none',
+              borderBottom: mobilePanel === panel ? '2px solid var(--color-gold)' : '2px solid transparent',
+              color: mobilePanel === panel ? 'var(--color-gold)' : 'rgba(255,255,255,0.5)',
+              fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            }}
+          >
+            {panel === 'tools'
+              ? <><Layers size={14} /> Alat</>
+              : <><Box size={14} /> Ruangan ({rooms.length})</>
+            }
+            {mobilePanel === panel ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+          </button>
+        ))}
+      </div>
+
+      {mobilePanel === 'tools' && (
+        <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
+          {/* Tool Buttons */}
+          <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-gold)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 10 }}>ALAT</p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
+            {TOOLS.map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => { setActiveTool(id as Tool); setMobilePanel(null); }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '10px 12px', borderRadius: 'var(--radius-md)', border: 'none',
+                  background: activeTool === id ? 'rgba(201,168,76,0.2)' : 'rgba(255,255,255,0.05)',
+                  color: activeTool === id ? 'var(--color-gold)' : 'rgba(255,255,255,0.7)',
+                  cursor: 'pointer', fontSize: 13, fontWeight: activeTool === id ? 600 : 400,
+                  borderLeft: activeTool === id ? '2px solid var(--color-gold)' : '2px solid transparent',
+                }}
+              >
+                <Icon size={16} /> {label}
+              </button>
+            ))}
+          </div>
+          {selectedRoom && (
+            <div style={{ background: 'rgba(201,168,76,0.1)', borderRadius: 'var(--radius-md)', padding: '12px', border: '1px solid rgba(201,168,76,0.3)', marginBottom: 16 }}>
+              <p style={{ fontSize: 11, color: 'var(--color-gold)', fontWeight: 600, marginBottom: 4 }}>DIPILIH: {selectedRoom.label}</p>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <label style={{ flex: 1 }}>
+                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 4 }}>Lebar</span>
+                  <input type="number" value={selectedRoom.width * 0.5}
+                    onChange={(e) => updateSelectedRoomDims(parseFloat(e.target.value) || 0.5, selectedRoom.height * 0.5)}
+                    style={{ width: '100%', padding: '6px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--color-gold)', borderRadius: 4, fontSize: 13 }}
+                    step="0.5" min="1" />
+                </label>
+                <label style={{ flex: 1 }}>
+                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 4 }}>Panjang</span>
+                  <input type="number" value={selectedRoom.height * 0.5}
+                    onChange={(e) => updateSelectedRoomDims(selectedRoom.width * 0.5, parseFloat(e.target.value) || 0.5)}
+                    style={{ width: '100%', padding: '6px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--color-gold)', borderRadius: 4, fontSize: 13 }}
+                    step="0.5" min="1" />
+                </label>
+              </div>
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn btn-primary btn-sm" style={{ flex: 1, display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center' }}>
+              <Save size={14} /> Simpan
+            </button>
+            <button onClick={() => { setRooms(() => []); setSelectedRoomId(null); }}
+              style={{ flex: 1, padding: '8px', borderRadius: 'var(--radius-md)', border: '1px solid rgba(255,255,255,0.15)', background: 'transparent', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <RotateCcw size={14} /> Reset
+            </button>
+          </div>
+        </div>
+      )}
+
+      {mobilePanel === 'rooms' && (
+        <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-gold)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 10 }}>TIPE RUANGAN — Ketuk untuk menambah</p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {ROOM_TYPES.map(({ type, label, defaultW, defaultH }) => (
+              <button
+                key={type}
+                onClick={() => spawnRoom(type, defaultW, defaultH)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '12px', borderRadius: 'var(--radius-md)', border: 'none',
+                  background: 'rgba(255,255,255,0.05)',
+                  color: 'rgba(255,255,255,0.8)',
+                  cursor: 'pointer', fontSize: 13,
+                  transition: 'var(--transition)',
+                }}
+              >
+                <div style={{ width: 12, height: 12, borderRadius: 2, background: getRoomColor(type), flexShrink: 0 }} />
+                <div style={{ textAlign: 'left' }}>
+                  <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 1 }}>{label}</p>
+                  <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{defaultW * 0.5}×{defaultH * 0.5}m</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ===== CANVAS AREA (extracted outside render) =====
+interface CanvasAreaProps {
+  canvasRef: React.RefObject<HTMLCanvasElement | null>;
+  CANVAS_W: number;
+  CANVAS_H: number;
+  isMobile: boolean;
+  activeTool: Tool;
+  rooms: Room[];
+  isDrawing: boolean;
+  handleMouseDown: (e: React.MouseEvent<HTMLCanvasElement>) => void;
+  handleMouseMove: (e: React.MouseEvent<HTMLCanvasElement>) => void;
+  handleMouseUp: () => void;
+  handleTouchStart: (e: React.TouchEvent<HTMLCanvasElement>) => void;
+  handleTouchMove: (e: React.TouchEvent<HTMLCanvasElement>) => void;
+}
+
+function CanvasArea({ canvasRef, CANVAS_W, CANVAS_H, isMobile, activeTool, rooms, isDrawing, handleMouseDown, handleMouseMove, handleMouseUp, handleTouchStart, handleTouchMove }: CanvasAreaProps) {
+  return (
+    <div style={{
+      flex: 1,
+      background: 'white',
+      overflow: 'auto',
+      position: 'relative',
+      cursor: activeTool === 'draw' ? 'crosshair' : activeTool === 'move' ? 'grab' : 'default',
+    }}>
+      <canvas
+        ref={canvasRef}
+        width={CANVAS_W}
+        height={CANVAS_H}
+        style={{ display: 'block', minWidth: isMobile ? CANVAS_W : '100%', height: 'auto' }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleMouseUp}
+      />
+      {rooms.length === 0 && !isDrawing && (
+        <div style={{
+          position: 'absolute', inset: 0,
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+          pointerEvents: 'none', color: 'var(--text-muted)',
+        }}>
+          <Layers size={isMobile ? 36 : 48} color="var(--border-color)" style={{ marginBottom: 16 }} />
+          <p style={{ fontSize: isMobile ? 14 : 16, fontWeight: 500, color: 'var(--text-secondary)' }}>
+            {isMobile ? 'Buka panel bawah untuk menambah ruangan' : 'Klik-seret untuk menggambar ruangan'}
+          </p>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+            {isMobile ? 'Atau pilih tipe ruangan lalu sentuh kanvas' : 'Pilih tipe ruangan di panel kiri, lalu gambar di kanvas'}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ===== MOBILE TOOL QUICK BAR (extracted outside render) =====
+interface MobileQuickBarProps {
+  activeTool: Tool;
+  setActiveTool: (t: Tool) => void;
+}
+
+function MobileQuickBar({ activeTool, setActiveTool }: MobileQuickBarProps) {
+  return (
+    <div style={{
+      background: '#1a1a2e',
+      padding: '8px 16px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      overflowX: 'auto',
+      borderBottom: '1px solid rgba(255,255,255,0.08)',
+      flexShrink: 0,
+    }}>
+      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap', flexShrink: 0 }}>Alat:</span>
+      {TOOLS.map(({ id, label, icon: Icon }) => (
+        <button
+          key={id}
+          onClick={() => setActiveTool(id as Tool)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 5,
+            padding: '5px 10px', borderRadius: 'var(--radius-full)', border: 'none', flexShrink: 0,
+            background: activeTool === id ? 'rgba(201,168,76,0.2)' : 'rgba(255,255,255,0.05)',
+            color: activeTool === id ? 'var(--color-gold)' : 'rgba(255,255,255,0.6)',
+            cursor: 'pointer', fontSize: 11, fontWeight: activeTool === id ? 600 : 400,
+            outline: activeTool === id ? '1px solid rgba(201,168,76,0.4)' : 'none',
+          }}
+        >
+          <Icon size={12} /> {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ===== MAIN PAGE =====
 export default function FloorPlannerPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [activeTool, setActiveTool] = useState<Tool>('draw');
@@ -279,345 +669,29 @@ export default function FloorPlannerPage() {
     if (isMobile) setMobilePanel(null);
   };
 
-  // ===== TOP BAR =====
-  const TopBar = () => (
-    <div style={{
-      background: '#1a1a2e',
-      borderBottom: '1px solid rgba(255,255,255,0.1)',
-      padding: isMobile ? '10px 16px' : '12px 24px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: isMobile ? 8 : 16,
-      flexShrink: 0,
-    }}>
-      <Link href="/studio" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, flexShrink: 0 }}>
-        <ArrowLeft size={16} /> {!isMobile && 'Studio'}
-      </Link>
-      {!isMobile && <ChevronRight size={14} color="rgba(255,255,255,0.3)" />}
-      <span style={{ color: 'white', fontWeight: 600, fontSize: isMobile ? 14 : 16, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        Designer Denah Lantai
-      </span>
-      {!isMobile && (
-        <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>— klik-seret untuk menggambar ruangan</span>
-      )}
-      <div style={{ marginLeft: isMobile ? 0 : 'auto', display: 'flex', gap: 8, flexShrink: 0 }}>
-        <Link href="/studio/furniture-3d/demo" className="btn btn-primary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Box size={14} /> {isMobile ? '3D' : 'Lanjut ke 3D'}
-        </Link>
-      </div>
-    </div>
-  );
+  const canvasAreaProps: CanvasAreaProps = {
+    canvasRef, CANVAS_W, CANVAS_H, isMobile, activeTool, rooms, isDrawing,
+    handleMouseDown, handleMouseMove, handleMouseUp, handleTouchStart, handleTouchMove,
+  };
 
-  // ===== LEFT PANEL DESKTOP CONTENT =====
-  const DesktopPanel = () => (
-    <div className="studio-panel" style={{ width: 240, padding: 20, display: 'flex', flexDirection: 'column', gap: 24 }}>
-      {/* Tools */}
-      <div>
-        <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-gold)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 12 }}>ALAT</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {TOOLS.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setActiveTool(id as Tool)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 10,
-                padding: '10px 14px', borderRadius: 'var(--radius-md)',
-                border: 'none',
-                background: activeTool === id ? 'rgba(201,168,76,0.2)' : 'transparent',
-                color: activeTool === id ? 'var(--color-gold)' : 'rgba(255,255,255,0.7)',
-                cursor: 'pointer', fontSize: 14,
-                fontWeight: activeTool === id ? 600 : 400,
-                transition: 'var(--transition)', width: '100%', textAlign: 'left',
-                borderLeft: activeTool === id ? '2px solid var(--color-gold)' : '2px solid transparent',
-              }}
-            >
-              <Icon size={16} /> {label}
-            </button>
-          ))}
-        </div>
-      </div>
+  const desktopPanelProps: DesktopPanelProps = {
+    activeTool, setActiveTool, activeRoomType, selectedRoom,
+    updateSelectedRoomDims, spawnRoom, setRooms, setSelectedRoomId,
+  };
 
-      {/* Selected Room Edit */}
-      {selectedRoom && (
-        <div style={{ background: 'rgba(201,168,76,0.1)', borderRadius: 'var(--radius-md)', padding: '12px 14px', border: '1px solid rgba(201,168,76,0.3)' }}>
-          <p style={{ fontSize: 11, color: 'var(--color-gold)', fontWeight: 600, marginBottom: 4 }}>DIPILIH</p>
-          <p style={{ fontSize: 15, color: 'white', fontWeight: 600 }}>{selectedRoom.label}</p>
-          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-            <label style={{ flex: 1 }}>
-              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 4 }}>Lebar (X) = m</span>
-              <input type="number" value={selectedRoom.width * 0.5}
-                onChange={(e) => updateSelectedRoomDims(parseFloat(e.target.value) || 0.5, selectedRoom.height * 0.5)}
-                style={{ width: '100%', padding: '6px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--color-gold)', borderRadius: 4, fontSize: 13, fontWeight: 600 }}
-                step="0.5" min="1" />
-            </label>
-            <label style={{ flex: 1 }}>
-              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 4 }}>Panjang (Y) = m</span>
-              <input type="number" value={selectedRoom.height * 0.5}
-                onChange={(e) => updateSelectedRoomDims(selectedRoom.width * 0.5, parseFloat(e.target.value) || 0.5)}
-                style={{ width: '100%', padding: '6px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--color-gold)', borderRadius: 4, fontSize: 13, fontWeight: 600 }}
-                step="0.5" min="1" />
-            </label>
-          </div>
-        </div>
-      )}
-
-      {/* Room Types */}
-      <div>
-        <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-gold)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 12 }}>TIPE RUANGAN</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {ROOM_TYPES.map(({ type, label, defaultW, defaultH }) => (
-            <button
-              key={type}
-              onClick={() => spawnRoom(type, defaultW, defaultH)}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: 'none',
-                background: activeRoomType === type && activeTool === 'draw' ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.04)',
-                color: activeRoomType === type && activeTool === 'draw' ? 'var(--color-gold)' : 'rgba(255,255,255,0.7)',
-                cursor: 'pointer', fontSize: 13, transition: 'var(--transition)', width: '100%',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 10, height: 10, borderRadius: 2, background: getRoomColor(type), border: '1px solid rgba(255,255,255,0.2)' }} />
-                {label}
-              </div>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{defaultW * 0.5}×{defaultH * 0.5}m</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Scale */}
-      <div>
-        <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 12 }}>SKALA</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {[['—', '1 kotak = 0.5 m'], ['——', '2 kotak = 1 m'], ['————', '4 kotak = 2 m']].map(([line, lbl]) => (
-            <div key={lbl} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>
-              <span style={{ color: 'rgba(255,255,255,0.6)', fontFamily: 'monospace' }}>{line}</span>
-              {lbl}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Actions */}
-      <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <button className="btn btn-primary" style={{ width: '100%', display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
-          <Save size={14} /> Simpan Desain
-        </button>
-        <button
-          onClick={() => { setRooms([]); setSelectedRoomId(null); }}
-          style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid rgba(255,255,255,0.15)', background: 'transparent', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-        >
-          <RotateCcw size={14} /> Reset Semua
-        </button>
-      </div>
-    </div>
-  );
-
-  // ===== MOBILE BOTTOM SHEET =====
-  const MobileBottomSheet = () => (
-    <div style={{
-      position: 'fixed', bottom: 0, left: 0, right: 0,
-      background: '#1a1a2e',
-      borderTop: '1px solid rgba(255,255,255,0.15)',
-      zIndex: 100,
-      borderRadius: '16px 16px 0 0',
-      maxHeight: mobilePanel ? '55vh' : 'auto',
-      display: 'flex',
-      flexDirection: 'column',
-      transition: 'max-height 0.3s ease',
-      boxShadow: '0 -8px 32px rgba(0,0,0,0.4)',
-    }}>
-      {/* Tab Bar */}
-      <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
-        {(['tools', 'rooms'] as const).map((panel) => (
-          <button
-            key={panel}
-            onClick={() => setMobilePanel(mobilePanel === panel ? null : panel)}
-            style={{
-              flex: 1, padding: '12px 8px', background: 'transparent', border: 'none',
-              borderBottom: mobilePanel === panel ? '2px solid var(--color-gold)' : '2px solid transparent',
-              color: mobilePanel === panel ? 'var(--color-gold)' : 'rgba(255,255,255,0.5)',
-              fontSize: 13, fontWeight: 600, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            }}
-          >
-            {panel === 'tools'
-              ? <><Layers size={14} /> Alat</>
-              : <><Box size={14} /> Ruangan ({rooms.length})</>
-            }
-            {mobilePanel === panel ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
-          </button>
-        ))}
-      </div>
-
-      {mobilePanel === 'tools' && (
-        <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
-          {/* Tool Buttons */}
-          <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-gold)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 10 }}>ALAT</p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
-            {TOOLS.map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => { setActiveTool(id as Tool); setMobilePanel(null); }}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '10px 12px', borderRadius: 'var(--radius-md)', border: 'none',
-                  background: activeTool === id ? 'rgba(201,168,76,0.2)' : 'rgba(255,255,255,0.05)',
-                  color: activeTool === id ? 'var(--color-gold)' : 'rgba(255,255,255,0.7)',
-                  cursor: 'pointer', fontSize: 13, fontWeight: activeTool === id ? 600 : 400,
-                  borderLeft: activeTool === id ? '2px solid var(--color-gold)' : '2px solid transparent',
-                }}
-              >
-                <Icon size={16} /> {label}
-              </button>
-            ))}
-          </div>
-          {selectedRoom && (
-            <div style={{ background: 'rgba(201,168,76,0.1)', borderRadius: 'var(--radius-md)', padding: '12px', border: '1px solid rgba(201,168,76,0.3)', marginBottom: 16 }}>
-              <p style={{ fontSize: 11, color: 'var(--color-gold)', fontWeight: 600, marginBottom: 4 }}>DIPILIH: {selectedRoom.label}</p>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <label style={{ flex: 1 }}>
-                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 4 }}>Lebar</span>
-                  <input type="number" value={selectedRoom.width * 0.5}
-                    onChange={(e) => updateSelectedRoomDims(parseFloat(e.target.value) || 0.5, selectedRoom.height * 0.5)}
-                    style={{ width: '100%', padding: '6px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--color-gold)', borderRadius: 4, fontSize: 13 }}
-                    step="0.5" min="1" />
-                </label>
-                <label style={{ flex: 1 }}>
-                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 4 }}>Panjang</span>
-                  <input type="number" value={selectedRoom.height * 0.5}
-                    onChange={(e) => updateSelectedRoomDims(selectedRoom.width * 0.5, parseFloat(e.target.value) || 0.5)}
-                    style={{ width: '100%', padding: '6px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--color-gold)', borderRadius: 4, fontSize: 13 }}
-                    step="0.5" min="1" />
-                </label>
-              </div>
-            </div>
-          )}
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn btn-primary btn-sm" style={{ flex: 1, display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center' }}>
-              <Save size={14} /> Simpan
-            </button>
-            <button onClick={() => { setRooms([]); setSelectedRoomId(null); }}
-              style={{ flex: 1, padding: '8px', borderRadius: 'var(--radius-md)', border: '1px solid rgba(255,255,255,0.15)', background: 'transparent', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-              <RotateCcw size={14} /> Reset
-            </button>
-          </div>
-        </div>
-      )}
-
-      {mobilePanel === 'rooms' && (
-        <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-gold)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 10 }}>TIPE RUANGAN — Ketuk untuk menambah</p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            {ROOM_TYPES.map(({ type, label, defaultW, defaultH }) => (
-              <button
-                key={type}
-                onClick={() => spawnRoom(type, defaultW, defaultH)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '12px', borderRadius: 'var(--radius-md)', border: 'none',
-                  background: 'rgba(255,255,255,0.05)',
-                  color: 'rgba(255,255,255,0.8)',
-                  cursor: 'pointer', fontSize: 13,
-                  transition: 'var(--transition)',
-                }}
-              >
-                <div style={{ width: 12, height: 12, borderRadius: 2, background: getRoomColor(type), flexShrink: 0 }} />
-                <div style={{ textAlign: 'left' }}>
-                  <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 1 }}>{label}</p>
-                  <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{defaultW * 0.5}×{defaultH * 0.5}m</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
-  // ===== CANVAS COMPONENT =====
-  const CanvasArea = () => (
-    <div style={{
-      flex: 1,
-      background: 'white',
-      overflow: 'auto',
-      position: 'relative',
-      cursor: activeTool === 'draw' ? 'crosshair' : activeTool === 'move' ? 'grab' : 'default',
-    }}>
-      <canvas
-        ref={canvasRef}
-        width={CANVAS_W}
-        height={CANVAS_H}
-        style={{ display: 'block', minWidth: isMobile ? CANVAS_W : '100%', height: 'auto' }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleMouseUp}
-      />
-      {rooms.length === 0 && !isDrawing && (
-        <div style={{
-          position: 'absolute', inset: 0,
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          pointerEvents: 'none', color: 'var(--text-muted)',
-        }}>
-          <Layers size={isMobile ? 36 : 48} color="var(--border-color)" style={{ marginBottom: 16 }} />
-          <p style={{ fontSize: isMobile ? 14 : 16, fontWeight: 500, color: 'var(--text-secondary)' }}>
-            {isMobile ? 'Buka panel bawah untuk menambah ruangan' : 'Klik-seret untuk menggambar ruangan'}
-          </p>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-            {isMobile ? 'Atau pilih tipe ruangan lalu sentuh kanvas' : 'Pilih tipe ruangan di panel kiri, lalu gambar di kanvas'}
-          </p>
-        </div>
-      )}
-    </div>
-  );
-
-  // ===== MOBILE TOOL QUICK BAR =====
-  const MobileQuickBar = () => (
-    <div style={{
-      background: '#1a1a2e',
-      padding: '8px 16px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: 8,
-      overflowX: 'auto',
-      borderBottom: '1px solid rgba(255,255,255,0.08)',
-      flexShrink: 0,
-    }}>
-      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap', flexShrink: 0 }}>Alat:</span>
-      {TOOLS.map(({ id, label, icon: Icon }) => (
-        <button
-          key={id}
-          onClick={() => setActiveTool(id as Tool)}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 5,
-            padding: '5px 10px', borderRadius: 'var(--radius-full)', border: 'none', flexShrink: 0,
-            background: activeTool === id ? 'rgba(201,168,76,0.2)' : 'rgba(255,255,255,0.05)',
-            color: activeTool === id ? 'var(--color-gold)' : 'rgba(255,255,255,0.6)',
-            cursor: 'pointer', fontSize: 11, fontWeight: activeTool === id ? 600 : 400,
-            outline: activeTool === id ? '1px solid rgba(201,168,76,0.4)' : 'none',
-          }}
-        >
-          <Icon size={12} /> {label}
-        </button>
-      ))}
-    </div>
-  );
+  const mobileBottomSheetProps: MobileBottomSheetProps = {
+    mobilePanel, setMobilePanel, rooms, activeTool, setActiveTool,
+    selectedRoom, updateSelectedRoomDims, spawnRoom, setRooms, setSelectedRoomId,
+  };
 
   if (!isMobile) {
     // DESKTOP
     return (
       <div style={{ height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column', background: '#1a1a2e', overflow: 'hidden' }}>
-        <TopBar />
+        <TopBar isMobile={isMobile} />
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
-          <DesktopPanel />
-          <CanvasArea />
+          <DesktopPanel {...desktopPanelProps} />
+          <CanvasArea {...canvasAreaProps} />
         </div>
       </div>
     );
@@ -626,17 +700,17 @@ export default function FloorPlannerPage() {
   // MOBILE
   return (
     <div style={{ height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column', background: '#1a1a2e', overflow: 'hidden', position: 'relative' }}>
-      <TopBar />
-      <MobileQuickBar />
+      <TopBar isMobile={isMobile} />
+      <MobileQuickBar activeTool={activeTool} setActiveTool={setActiveTool} />
       <div style={{
         flex: 1,
         overflow: 'hidden',
         paddingBottom: mobilePanel ? '55vh' : '48px',
         transition: 'padding-bottom 0.3s ease',
       }}>
-        <CanvasArea />
+        <CanvasArea {...canvasAreaProps} />
       </div>
-      <MobileBottomSheet />
+      <MobileBottomSheet {...mobileBottomSheetProps} />
     </div>
   );
 }

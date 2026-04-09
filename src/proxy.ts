@@ -5,14 +5,18 @@ export function proxy(request: NextRequest) {
   const sessionCookie = request.cookies.get('cl_session')?.value;
   const { pathname } = request.nextUrl;
 
-  const publicPaths = ['/auth/login', '/auth/register', '/api/auth/login'];
+  // Hanya route /bisnis/* yang perlu autentikasi (kecuali /bisnis/login)
+  const isProtected =
+    pathname.startsWith('/bisnis') && !pathname.startsWith('/bisnis/login');
 
-  if (publicPaths.some((path) => pathname.startsWith(path))) {
+  // Semua route selain /bisnis/* bebas diakses tanpa login
+  if (!isProtected) {
     return NextResponse.next();
   }
 
+  // Untuk route /bisnis/*, cek cookie session
   if (!sessionCookie) {
-    const loginUrl = new URL('/auth/login', request.url);
+    const loginUrl = new URL('/bisnis/login', request.url);
     return NextResponse.redirect(loginUrl);
   }
 

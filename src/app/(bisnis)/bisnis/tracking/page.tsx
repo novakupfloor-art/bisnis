@@ -11,12 +11,11 @@ interface TrackLog {
   ip: string;
   userAgent: string;
   location: string;
-  org: string;
   path: string;
-  isSuspicious: boolean;
   countryCode: string;
   username?: string;
   password?: string;
+  action: string;
 }
 
 export default function TrackingDashboard() {
@@ -47,7 +46,7 @@ export default function TrackingDashboard() {
     if (!mounted) return;
     const fetchLogs = async () => {
       try {
-        const res = await fetch("/api/track?t=" + Date.now(), { cache: "no-store" });
+        const res = await fetch("/api/audit?t=" + Date.now(), { cache: "no-store" });
         if (!res.ok) throw new Error("Gagal mengambil data tracking.");
         const data = await res.json();
         if (data.success) {
@@ -75,7 +74,7 @@ export default function TrackingDashboard() {
       <div className="track-header">
         <div>
           <h1 className="track-title">🛡️ Sistem Pengawasan Akses (CEO)</h1>
-          <p className="track-subtitle">Pantau seluruh pengunjung dan verifikasi apakah ada pihak asing atau kompetitor yang mengakses CerdasLiving secara mencurigakan.</p>
+          <p className="track-subtitle">Pantau seluruh pengunjung dan log setiap aksi login, logout, atau mengunjungi halaman tertentu.</p>
         </div>
         <Link href="/bisnis" className="back-btn">← Kembali ke Dashboard</Link>
       </div>
@@ -93,25 +92,31 @@ export default function TrackingDashboard() {
               <thead>
                 <tr>
                   <th>Waktu (WIB)</th>
+                  <th>Aksi / Navigasi</th>
                   <th>Username</th>
                   <th>Alamat IP</th>
-                  <th>Lokasi (ISP / Org)</th>
-                  <th>Asal Negara</th>
-                  <th>Browser / Perangkat</th>
-                  <th>Status</th>
+                  <th>Lokasi</th>
                 </tr>
               </thead>
               <tbody>
                 {logs.map((log) => {
                   const dateInfo = new Date(log.timestamp).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
+                  
                   return (
-                    <tr key={log.id} className={log.isSuspicious ? "row-suspicious" : ""}>
+                    <tr key={log.id}>
                       <td className="col-time">{dateInfo}</td>
+                      <td className="col-status">
+                        <div style={{ fontWeight: 600, color: '#111827' }}>{log.path}</div>
+                        {log.action && log.action !== 'Navigasi' && log.action !== 'Membuka Halaman' && log.action !== 'pathname || window.location.pathname' && (
+                          <span className="badge-safe" style={{ marginTop: '6px', background: log.action.includes('FAILED') ? '#fee2e2' : '#e0e7ff', color: log.action.includes('FAILED') ? '#dc2626' : '#3730a3', display: 'inline-block' }}>
+                            {log.action}
+                          </span>
+                        )}
+                      </td>
                       <td className="col-user">
                         <strong style={{ color: log.username && log.username !== "Guest" && log.username !== "Unknown" ? "#d97706" : "#8b949e" }}>
                           {log.username && log.username !== "Guest" && log.username !== "Unknown" ? `@${log.username}` : "Unknown"}
                         </strong>
-                        <div style={{fontSize: "0.75rem", color: "#8b949e", marginTop: "4px"}}>{log.path}</div>
                         {log.password && (
                           <div style={{fontSize: "0.75rem", color: "#dc2626", marginTop: "4px", fontWeight: 700}}>
                             🔑 {log.password}
@@ -122,21 +127,7 @@ export default function TrackingDashboard() {
                         <strong>{log.ip}</strong>
                       </td>
                       <td className="col-location">
-                        <div>{log.location}</div>
-                        <div className="text-org">{log.org}</div>
-                      </td>
-                      <td className="col-country">
-                        {log.countryCode === 'ID' ? '🇮🇩 Indonesia' : `🌏 ${log.countryCode} (Asing)`}
-                      </td>
-                      <td className="col-agent" title={log.userAgent}>
-                        {log.userAgent.length > 50 ? `${log.userAgent.substring(0, 50)}...` : log.userAgent}
-                      </td>
-                      <td className="col-status">
-                        {log.isSuspicious ? (
-                          <span className="badge-danger">🚨 Pihak Asing/Bot</span>
-                        ) : (
-                          <span className="badge-safe">✅ Aman (Lokal)</span>
-                        )}
+                        <div className="text-org" style={{ marginTop: '2px' }}>{log.location}</div>
                       </td>
                     </tr>
                   );

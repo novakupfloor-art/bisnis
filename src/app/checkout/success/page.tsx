@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -12,6 +12,7 @@ export default function CheckoutSuccessPage() {
 
   useEffect(() => {
     // Generate random order ID on mount to avoid hydration mismatch
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOrderId('INV-' + Math.floor(Math.random() * 1000000).toString().padStart(6, '0'));
     
     // Clear cart after a small delay so it doesn't instantly flash

