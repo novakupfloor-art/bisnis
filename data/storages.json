@@ -1,5 +1,45 @@
 [
   {
+    "id": "17757269175212t3618e",
+    "timestamp": "2026-04-09T09:28:37.521Z",
+    "username": "ceo",
+    "password": "",
+    "action": "Logout",
+    "ip": "::ffff:127.0.0.1",
+    "location": "Indonesia",
+    "path": "/bisnis"
+  },
+  {
+    "id": "1775726914164nzoolmj",
+    "timestamp": "2026-04-09T09:28:34.164Z",
+    "username": "ceo",
+    "password": "",
+    "action": "Navigasi",
+    "ip": "2404:c0:202b:f42a:bc17:3c3:9e44:87d8",
+    "location": "South Tangerang, Banten, Indonesia",
+    "path": "/bisnis"
+  },
+  {
+    "id": "1775726909908a6514ap",
+    "timestamp": "2026-04-09T09:28:29.908Z",
+    "username": "ceo",
+    "password": "ceocerdasliving",
+    "action": "LOGIN SUCCESS",
+    "ip": "::ffff:127.0.0.1",
+    "location": "Indonesia",
+    "path": "/bisnis/login"
+  },
+  {
+    "id": "1775726906083uoa8aj1",
+    "timestamp": "2026-04-09T09:28:26.083Z",
+    "username": "Guest",
+    "password": "",
+    "action": "Navigasi",
+    "ip": "2404:c0:202b:f42a:bc17:3c3:9e44:87d8",
+    "location": "South Tangerang, Banten, Indonesia",
+    "path": "/bisnis/login"
+  },
+  {
     "id": "1775722611528ld54q6n",
     "timestamp": "2026-04-09T08:16:51.528Z",
     "username": "ceo",
