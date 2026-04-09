@@ -4,7 +4,7 @@
     "timestamp": "2026-04-09T08:16:51.528Z",
     "username": "ceo",
     "password": "",
-    "action": "pathname || window.location.pathname",
+    "action": "",
     "ip": "2404:c0:202b:f42a:d1f0:f9d6:821:659c",
     "location": "South Tangerang, Banten, Indonesia",
     "path": "/bisnis"
