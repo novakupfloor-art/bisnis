@@ -3,12 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-const VALID_USERS: Record<string, { display: string; emoji: string; role: string; password?: string }> = {
-  ian: { display: "Ian", emoji: "👤", role: "member" },
-  dody: { display: "Dody", emoji: "👤", role: "member" },
-  ceo: { display: "CEO", emoji: "🛡️", role: "admin", password: "ceocerdasliving" },
-};
-
 export default function BisnisLoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
@@ -19,7 +13,6 @@ export default function BisnisLoginPage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     try {
       if (localStorage.getItem("cl_user")) router.replace("/bisnis");
@@ -30,8 +23,6 @@ export default function BisnisLoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-
-    const key = username.trim().toLowerCase();
 
     const processTracking = (statusText: string) => {
       fetch("/api/audit", {
@@ -46,33 +37,34 @@ export default function BisnisLoginPage() {
       }).catch(() => {});
     };
 
-    setTimeout(() => {
-      const user = VALID_USERS[key];
-
-      if (!user) {
-        processTracking("LOGIN FAILED - USER TIDAK DIKENALI");
-        setError("Username tidak dikenali.");
-        setLoading(false);
-        return;
-      }
-      
-      const expectedPassword = user.password || key;
-      if (password.trim().toLowerCase() !== expectedPassword.toLowerCase()) {
-        processTracking("LOGIN FAILED - BATAL PASSWORD SALAH");
-        setError("Password salah.");
-        setLoading(false);
-        return;
-      }
-
-      processTracking("LOGIN SUCCESS");
-
+    const runLogin = async () => {
       try {
-        localStorage.setItem("cl_user", JSON.stringify({ key, display: user.display, emoji: user.emoji, role: user.role }));
-        document.cookie = `cl_session=${key}; path=/; max-age=86400; SameSite=Lax`;
-      } catch { }
-      
-      router.replace("/bisnis");
-    }, 600);
+        const res = await fetch("/api/auth/bisnis-login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+        
+        const data = await res.json();
+
+        if (data.success) {
+          processTracking("LOGIN SUCCESS");
+          localStorage.setItem("cl_user", JSON.stringify(data.user));
+          document.cookie = `cl_session=${data.user.key}; path=/; max-age=86400; SameSite=Lax`;
+          router.replace("/bisnis");
+        } else {
+          processTracking(`LOGIN FAILED - ${(data.message || "Unknown").toUpperCase()}`);
+          setError(data.message);
+          setLoading(false);
+        }
+      } catch (err) {
+        processTracking("LOGIN ERROR - SYSTEM FAILURE");
+        setError("Terjadi kesalahan sistem. Hubungi developer.");
+        setLoading(false);
+      }
+    };
+
+    setTimeout(runLogin, 600);
   };
 
   if (!mounted) return null;

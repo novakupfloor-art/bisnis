@@ -12,43 +12,50 @@ import { useRouter, usePathname } from 'next/navigation';
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-
   const [mounted, setMounted] = useState(false);
 
-  // Route yang butuh autentikasi: SEMUA route kecuali login
+  // MENCEGAH AKSES DARI SEMUA HALAMAN KECUALI LOGIN
   const isProtectedPath = useMemo(() => {
     if (!pathname) return false;
+    // Kecualikan hanya halaman login bisnis
     return !pathname.startsWith('/bisnis/login');
   }, [pathname]);
 
   useEffect(() => {
     setMounted(true);
-
+    
+    // Jika di halaman login, abaikan pengecekan
     if (!isProtectedPath) return;
 
-    let hasSession = false;
-    try {
-      hasSession = !!localStorage.getItem('cl_user');
-    } catch { }
+    const checkSession = () => {
+      try {
+        const user = localStorage.getItem('cl_user');
+        if (!user) {
+          router.replace('/bisnis/login');
+        }
+      } catch (e) {
+        router.replace('/bisnis/login');
+      }
+    };
 
-    if (!hasSession) {
-      router.replace('/bisnis/login');
-    }
+    checkSession();
   }, [pathname, router, isProtectedPath]);
 
-  // Untuk route yang tidak dilindungi, render langsung (tidak perlu menunggu mount)
+  // Render halaman login tanpa hambatan
   if (!isProtectedPath) return <>{children}</>;
 
-  // Untuk route yang dilindungi, tunggu sampai cek selesai
+  // Untuk halaman yang dikunci, tunggu hingga Client-side Hydration selesai
   if (!mounted) return null;
 
-  // Cek session sekali lagi sebelum render
-  let hasSession = false;
+  // Verifikasi session terakhir sebelum konten dimunculkan
+  let hasValidSession = false;
   try {
-    hasSession = !!localStorage.getItem('cl_user');
+    hasValidSession = !!localStorage.getItem('cl_user');
   } catch { }
 
-  if (!hasSession) return null;
+  if (!hasValidSession) {
+    return null;
+  }
 
   return <>{children}</>;
 }

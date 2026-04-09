@@ -5,17 +5,20 @@ export function proxy(request: NextRequest) {
   const sessionCookie = request.cookies.get('cl_session')?.value;
   const { pathname } = request.nextUrl;
 
-  // Hanya route /bisnis/* yang perlu autentikasi (kecuali /bisnis/login)
-  const isProtected =
-    pathname.startsWith('/bisnis') && !pathname.startsWith('/bisnis/login');
+  // SEMUA route dikunci (kecuali login)
+  const isProtected = !pathname.startsWith('/bisnis/login');
 
-  // Semua route selain /bisnis/* bebas diakses tanpa login
-  if (!isProtected) {
+  // Skip static files & api
+  if (
+    pathname.includes('.') || 
+    pathname.startsWith('/api') || 
+    pathname.startsWith('/_next')
+  ) {
     return NextResponse.next();
   }
 
-  // Untuk route /bisnis/*, cek cookie session
-  if (!sessionCookie) {
+  // Jika dilindungi dan tidak ada cookie session, tendang ke login
+  if (isProtected && !sessionCookie) {
     const loginUrl = new URL('/bisnis/login', request.url);
     return NextResponse.redirect(loginUrl);
   }
