@@ -3,13 +3,14 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   try {
     const { username, password } = await request.json();
-    const usersJson = process.env.CL_USERS_JSON;
 
-    if (!usersJson) {
-      return NextResponse.json({ success: false, message: 'Server configuration error' }, { status: 500 });
-    }
-
-    const VALID_USERS = JSON.parse(usersJson);
+    const VALID_USERS: Record<string, any> = {
+      "ian": {"password":"ian","display":"Ian","role":"member","emoji":"👤"},
+      "dody": {"password":"dody","display":"Dody","role":"member","emoji":"👤"},
+      "ceo": {"password":"ceocerdasliving","display":"CEO","role":"admin","emoji":"🛡️"},
+      "admin": {"password":"admincerdas","display":"Admin","role":"admin","emoji":"⚡"},
+      "pembangunancerdasliving": {"password":"ceocerdasliving","display":"Developer","role":"admin","emoji":"🏗️"}
+    };
     const key = username.trim().toLowerCase();
     const user = VALID_USERS[key];
 
