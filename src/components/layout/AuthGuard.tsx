@@ -5,9 +5,9 @@ import { useRouter, usePathname } from 'next/navigation';
 
 /**
  * Client‑side auth guard.
- * Hanya melindungi route /bisnis/* (kecuali /bisnis/login).
- * Semua route lain (beranda, properti, fashion, furniture, studio, auth, dll)
- * dapat diakses bebas tanpa login.
+ * MENGUNCIL SEMUA HALAMAN.
+ * Pengguna yang belum login TIDAK BISA mengakses halaman manapun
+ * kecuali halaman `/bisnis/login`.
  */
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -15,10 +15,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   const [mounted, setMounted] = useState(false);
 
-  // Route yang butuh autentikasi: hanya /bisnis/* kecuali /bisnis/login
+  // Route yang butuh autentikasi: SEMUA route kecuali login
   const isProtectedPath = useMemo(() => {
     if (!pathname) return false;
-    return pathname.startsWith('/bisnis') && !pathname.startsWith('/bisnis/login');
+    return !pathname.startsWith('/bisnis/login');
   }, [pathname]);
 
   useEffect(() => {

@@ -277,7 +277,7 @@ export default function BisnisLoginPage() {
                 value={username}
                 onChange={(e) => { setUsername(e.target.value); setError(""); }}
                 autoComplete="username"
-                placeholder="(username tuliskan nama yang terdaftar)"
+                placeholder="silahkan tulis username anda"
                 required
               />
             </div>
