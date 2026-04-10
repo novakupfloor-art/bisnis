@@ -1,13 +1,26 @@
 import { NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { createClient } from 'redis';
 
 export const dynamic = 'force-dynamic';
 
-// Kita menggunakan file public/data.json atau folder di luar publik untuk menyimpan logs
-// Di lingkungan production berbasis Node.js/Laragon, file ini akan bertahan secara lokal.
-const dataDir = path.join(process.cwd(), 'data');
-const dataFilePath = path.join(dataDir, 'storages.json');
+// Menggunakan Environment Variable dari Vercel / .env.local
+const REDIS_URL = process.env.REDIS_URL || '';
+
+async function getRedisClient() {
+  // @ts-ignore
+  if (!globalThis._redisClient) {
+    // @ts-ignore
+    globalThis._redisClient = createClient({
+      url: REDIS_URL
+    });
+    // @ts-ignore
+    globalThis._redisClient.on('error', (err: any) => console.log('Redis Client Error', err));
+    // @ts-ignore
+    await globalThis._redisClient.connect();
+  }
+  // @ts-ignore
+  return globalThis._redisClient;
+}
 
 interface TrackingLog {
   id: string;
@@ -23,21 +36,6 @@ interface TrackingLog {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    
-    try {
-      await fs.access(dataDir);
-    } catch {
-      await fs.mkdir(dataDir, { recursive: true });
-    }
-
-    let logs: TrackingLog[] = [];
-    try {
-      const fileData = await fs.readFile(dataFilePath, 'utf8');
-      logs = JSON.parse(fileData) as TrackingLog[];
-    } catch {
-      // empty array
-    }
-
     const forwardedFor = request.headers.get('x-forwarded-for');
     const realIp = request.headers.get('x-real-ip');
     const serverSideIp = forwardedFor ? forwardedFor.split(',')[0].trim() : (realIp || 'Unknown IP Server-Side');
@@ -54,36 +52,48 @@ export async function POST(request: Request) {
       path: body.path || '/'
     };
 
-    logs.unshift(newLog);
-
-    // Filter agar file tidak kelebihan data (max 2000 log)
-    if (logs.length > 2000) {
-      logs = logs.slice(0, 2000);
+    if (!REDIS_URL) {
+      console.warn("REDIS_URL tidak ditemukan. Mengabaikan penyimpanan...");
+      return NextResponse.json({ success: true, log: newLog, warning: "Redis URL missing" });
     }
 
-    // Tulis ke JSON
-    await fs.writeFile(dataFilePath, JSON.stringify(logs, null, 2), 'utf8');
+    const redis = await getRedisClient();
+    
+    // Simpan data di urutan paling depan list "cl_tracking_logs"
+    await redis.lPush("cl_tracking_logs", JSON.stringify(newLog));
+    
+    // Batasi maksimum 2000 log terbaru agar Redis tidak kepenuhan RAM
+    await redis.lTrim("cl_tracking_logs", 0, 1999);
 
     return NextResponse.json({ success: true, log: newLog });
   } catch (error) {
     console.error('Tracking POST Error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal merekam data tracking' }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Gagal merekam data tracking ke database' }, { status: 500 });
   }
 }
 
 export async function GET() {
   try {
-    let logs: TrackingLog[] = [];
-    try {
-      const fileData = await fs.readFile(dataFilePath, 'utf8');
-      logs = JSON.parse(fileData) as TrackingLog[];
-    } catch {
-      logs = []; // Return empty array if file not created yet
+    if (!REDIS_URL) {
+      return NextResponse.json({ success: true, count: 0, data: [] });
     }
+    
+    const redis = await getRedisClient();
+    // Ambil semua isi log dari Redis array
+    const rawLogs = await redis.lRange("cl_tracking_logs", 0, -1);
+    
+    // Konversi string JSON kembali ke object Array
+    const logs: TrackingLog[] = rawLogs.map((logStr: string) => {
+      try {
+        return JSON.parse(logStr);
+      } catch {
+        return null; // Skip corrupted logs
+      }
+    }).filter(Boolean) as TrackingLog[];
     
     return NextResponse.json({ success: true, count: logs.length, data: logs });
   } catch (error) {
     console.error('Tracking GET Error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal membaca data tracking' }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Gagal mengambil data tracking dari database' }, { status: 500 });
   }
 }

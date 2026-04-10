@@ -1,5 +1,125 @@
 [
   {
+    "id": "1775804865120l71gyaj",
+    "timestamp": "2026-04-10T07:07:45.120Z",
+    "username": "Guest",
+    "password": "",
+    "action": "Navigasi",
+    "ip": "::ffff:127.0.0.1",
+    "location": "Indonesia",
+    "path": "/bisnis/login"
+  },
+  {
+    "id": "17758048648903gtidl1",
+    "timestamp": "2026-04-10T07:07:44.891Z",
+    "username": "admin",
+    "password": "",
+    "action": "Logout",
+    "ip": "::ffff:127.0.0.1",
+    "location": "Indonesia",
+    "path": "/bisnis"
+  },
+  {
+    "id": "1775804863955gnis88q",
+    "timestamp": "2026-04-10T07:07:43.955Z",
+    "username": "admin",
+    "password": "",
+    "action": "Navigasi",
+    "ip": "::ffff:127.0.0.1",
+    "location": "Indonesia",
+    "path": "/bisnis"
+  },
+  {
+    "id": "1775804858486xybyw31",
+    "timestamp": "2026-04-10T07:07:38.486Z",
+    "username": "admin",
+    "password": "",
+    "action": "Navigasi",
+    "ip": "::ffff:127.0.0.1",
+    "location": "Indonesia",
+    "path": "/bisnis/tracking"
+  },
+  {
+    "id": "17758048535266qjklji",
+    "timestamp": "2026-04-10T07:07:33.526Z",
+    "username": "Admin",
+    "password": "Admincerdas",
+    "action": "LOGIN SUCCESS",
+    "ip": "::ffff:127.0.0.1",
+    "location": "Indonesia",
+    "path": "/bisnis/login"
+  },
+  {
+    "id": "177580484703481v2qyu",
+    "timestamp": "2026-04-10T07:07:27.034Z",
+    "username": "Guest",
+    "password": "",
+    "action": "Navigasi",
+    "ip": "2402:8780:1071:1d70:d5d4:6b:15d8:4c26",
+    "location": "Jakarta, Jakarta, Indonesia",
+    "path": "/bisnis/login"
+  },
+  {
+    "id": "17758048463599pmyw09",
+    "timestamp": "2026-04-10T07:07:26.359Z",
+    "username": "ceo",
+    "password": "",
+    "action": "Logout",
+    "ip": "::ffff:127.0.0.1",
+    "location": "Indonesia",
+    "path": "/bisnis"
+  },
+  {
+    "id": "177580484550996zoryu",
+    "timestamp": "2026-04-10T07:07:25.509Z",
+    "username": "ceo",
+    "password": "",
+    "action": "Navigasi",
+    "ip": "2402:8780:1071:1d70:d5d4:6b:15d8:4c26",
+    "location": "Jakarta, Jakarta, Indonesia",
+    "path": "/bisnis"
+  },
+  {
+    "id": "17758048396142vwc9cx",
+    "timestamp": "2026-04-10T07:07:19.614Z",
+    "username": "ceo",
+    "password": "",
+    "action": "Navigasi",
+    "ip": "2402:8780:1071:1d70:d5d4:6b:15d8:4c26",
+    "location": "Jakarta, Jakarta, Indonesia",
+    "path": "/bisnis/tracking"
+  },
+  {
+    "id": "17758048358309jxi27t",
+    "timestamp": "2026-04-10T07:07:15.830Z",
+    "username": "ceo",
+    "password": "",
+    "action": "Navigasi",
+    "ip": "2402:8780:1071:1d70:d5d4:6b:15d8:4c26",
+    "location": "Jakarta, Jakarta, Indonesia",
+    "path": "/bisnis"
+  },
+  {
+    "id": "1775804833354znklbfg",
+    "timestamp": "2026-04-10T07:07:13.354Z",
+    "username": "ceo",
+    "password": "ceocerdasliving",
+    "action": "LOGIN SUCCESS",
+    "ip": "::ffff:127.0.0.1",
+    "location": "Indonesia",
+    "path": "/bisnis/login"
+  },
+  {
+    "id": "17758048298048am2085",
+    "timestamp": "2026-04-10T07:07:09.804Z",
+    "username": "Guest",
+    "password": "",
+    "action": "Navigasi",
+    "ip": "2402:8780:1071:1d70:d5d4:6b:15d8:4c26",
+    "location": "Jakarta, Jakarta, Indonesia",
+    "path": "/bisnis/login"
+  },
+  {
     "id": "17757269175212t3618e",
     "timestamp": "2026-04-09T09:28:37.521Z",
     "username": "ceo",
